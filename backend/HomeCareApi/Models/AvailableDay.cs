@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace HomeCareAppointment.Models
+
+namespace HomeCareApi.Models
 {
     public class AvailableDay
     {
