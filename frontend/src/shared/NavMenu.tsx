@@ -16,6 +16,7 @@ const NavMenu: React.FC = () => {
             <Nav.Link href="/items">Items</Nav.Link>
             <Nav.Link href="/available-days">Available Days</Nav.Link>
             <Nav.Link href="/patients">Patients</Nav.Link>
+            <Nav.Link href="/personnels">Personnel</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

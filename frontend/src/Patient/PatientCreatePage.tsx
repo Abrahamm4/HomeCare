@@ -1,4 +1,3 @@
-// src/patient/PatientCreatePage.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PatientForm from './PatientForm';
