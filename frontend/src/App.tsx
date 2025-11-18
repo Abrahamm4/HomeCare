@@ -3,23 +3,23 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Container from 'react-bootstrap/Container'
-import NavMenu from './shared/NavMenu'
 import './App.css'
+import HomePage from './Home/HomePage'
 import AvailableDaysPage from './AvailableDays/AvailableDays'
+import NavMenu from './shared/NavMenu'
 
 const App: React.FC=() => {
   return(
-    <>
+    <Router>
     <NavMenu />
     <Container>
-      <Router>
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/available-days" element={<AvailableDaysPage />} />
           <Route path="*" element={<Navigate to ="/" replace />} />
         </Routes>
-      </Router>
     </Container>
-    </>
+</Router>
   )
 }
 export default App

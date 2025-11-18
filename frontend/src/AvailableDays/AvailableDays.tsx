@@ -27,7 +27,7 @@ const AvailableDaysPage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await fetch(`${API_URL}/backend/HomeCareApi/AvailableDays`);
+      const res = await fetch(`${API_URL}/backend/api/AvailableDays`);
       if (!res.ok) throw new Error("Failed to fetch days");
       const data: AvailableDay[] = await res.json();
       setDays(data);
@@ -91,12 +91,12 @@ const AvailableDaysPage: React.FC = () => {
   const filtered = days.filter((d) =>
     d.date.toLowerCase().includes(search.toLowerCase())
   );
-
+//FIX: navigation to create and edit pages
   return (
     <div className="container mt-4">
       <h1>Available Days</h1>
 
-      <Button onClick={() => setShowModal(true)} className="me-3">
+      <Button onClick={() => setShowModal(true)} className="me-3"> 
         Create Available Day
       </Button>
 
