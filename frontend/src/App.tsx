@@ -10,6 +10,12 @@ import NavMenu from './shared/NavMenu'
 import PatientListPage from './Patient/PatientListPage'
 import PatientCreatePage from './Patient/PatientCreatePage'
 import PatientUpdatePage from './Patient/PatientUpdatePage'
+import PersonnelListpage from './Personnel/PersonnelListPage'
+import PersonnelUpdatepage from './Personnel/PersonnelUpdatePage'
+import PersonnelCreatepage from './Personnel/PersonnelCreatePage'
+import PersonnelListPage from './Personnel/PersonnelListPage'
+import PersonnelCreatePage from './Personnel/PersonnelCreatePage'
+import PersonnelUpdatePage from './Personnel/PersonnelUpdatePage'
 
 const App: React.FC=() => {
   return(
@@ -24,6 +30,10 @@ const App: React.FC=() => {
           <Route path="/patients" element={<PatientListPage />} />
           <Route path="/patientcreate" element={<PatientCreatePage />} />
           <Route path="/patientupdate/:patientId" element={<PatientUpdatePage />} />
+                    {/* Personnel pages */}   
+          <Route path="/personnels" element={<PersonnelListPage />} />
+          <Route path="/personnelcreate" element={<PersonnelCreatePage />} />
+          <Route path="/personnelupdate/:personnelId" element={<PersonnelUpdatePage />} />
         </Routes>
     </Container>
 </Router>
