@@ -7,6 +7,9 @@ import './App.css'
 import HomePage from './Home/HomePage'
 import AvailableDaysPage from './AvailableDays/AvailableDays'
 import NavMenu from './shared/NavMenu'
+import PatientListPage from './Patient/PatientListPage'
+import PatientCreatePage from './Patient/PatientCreatePage'
+import PatientUpdatePage from './Patient/PatientUpdatePage'
 
 const App: React.FC=() => {
   return(
@@ -17,6 +20,10 @@ const App: React.FC=() => {
           <Route path="/" element={<HomePage />} />
           <Route path="/available-days" element={<AvailableDaysPage />} />
           <Route path="*" element={<Navigate to ="/" replace />} />
+                    {/* Patient pages */}
+          <Route path="/patients" element={<PatientListPage />} />
+          <Route path="/patientcreate" element={<PatientCreatePage />} />
+          <Route path="/patientupdate/:patientId" element={<PatientUpdatePage />} />
         </Routes>
     </Container>
 </Router>
