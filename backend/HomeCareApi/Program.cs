@@ -56,6 +56,18 @@ namespace HomeCareApi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // CORS (Cross-Origin Resource Sharing)
+            builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    {
+        builder.WithOrigins("http://localhost:5173") // Allow requests from the React frontend
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials();
+    });
+});
+
             var app = builder.Build();
 
             // ===============================
@@ -83,6 +95,7 @@ namespace HomeCareApi
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("CorsPolicy");
             app.UseAuthorization();
             app.MapControllers();
 

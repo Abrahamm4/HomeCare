@@ -1,9 +1,29 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Container from 'react-bootstrap/Container'
+import NavMenu from './shared/NavMenu'
 import './App.css'
+import AvailableDaysPage from './AvailableDays/AvailableDays'
 
-function App() {
+const App: React.FC=() => {
+  return(
+    <>
+    <NavMenu />
+    <Container>
+      <Router>
+        <Routes>
+          <Route path="/available-days" element={<AvailableDaysPage />} />
+          <Route path="*" element={<Navigate to ="/" replace />} />
+        </Routes>
+      </Router>
+    </Container>
+    </>
+  )
+}
+export default App
+/*function App() {
   const [count, setCount] = useState(0)
 
   return (
@@ -33,3 +53,4 @@ function App() {
 }
 
 export default App
+*/
