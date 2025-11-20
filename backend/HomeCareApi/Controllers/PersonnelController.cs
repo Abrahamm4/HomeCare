@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using HomeCareApi.DAL;
 using HomeCareApi.Models;
+using HomeCareApi.Models.Dto;
 
 namespace HomeCareApi.Controllers
 {
@@ -22,26 +23,32 @@ namespace HomeCareApi.Controllers
             _logger = logger;
         }
 
+        private static PersonnelDto ToDto(Personnel p) => new()
+        {
+            Id = p.Id,
+            Name = p.Name
+        };
+
         // GET: api/personnel
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Personnel>>> GetAll()
+        public async Task<ActionResult<IEnumerable<PersonnelDto>>> GetAll()
         {
             var list = await _personnels.GetAllAsync() ?? Enumerable.Empty<Personnel>();
-            return Ok(list.OrderBy(p => p.Name));
+            return Ok(list.OrderBy(p => p.Name).Select(ToDto));
         }
 
         // GET: api/personnel/{id}
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Personnel>> GetById(int id)
+        public async Task<ActionResult<PersonnelDto>> GetById(int id)
         {
             var entity = await _personnels.GetByIdAsync(id);
             if (entity == null) return NotFound();
-            return Ok(entity);
+            return Ok(ToDto(entity));
         }
 
         // POST: api/personnel
         [HttpPost]
-        public async Task<ActionResult<Personnel>> Create([FromBody] Personnel model)
+        public async Task<ActionResult<PersonnelDto>> Create([FromBody] Personnel model)
         {
             if (model == null) return BadRequest();
             if (string.IsNullOrWhiteSpace(model.Name))
@@ -53,7 +60,7 @@ namespace HomeCareApi.Controllers
                 _logger.LogError("[PersonnelController] Create failed {@Personnel}", model);
                 return Problem("Could not create personnel");
             }
-            return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
+            return CreatedAtAction(nameof(GetById), new { id = model.Id }, ToDto(model));
         }
 
         // PUT: api/personnel/{id}

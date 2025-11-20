@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HomeCareApi.DAL;
 using HomeCareApi.Models;
+using HomeCareApi.Models.Dto;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,55 +33,82 @@ namespace HomeCareApi.Controllers
             _logger = logger;
         }
 
+        private static AppointmentDto ToDto(Appointment a) => new()
+        {
+            AppointmentId = a.AppointmentId,
+            PatientId = a.PatientId,
+            PersonnelId = a.PersonnelId,
+            AvailableDayId = a.AvailableDayId,
+            Date = a.Date,
+            Notes = a.Notes
+        };
+
         // GET: api/appointments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAll()
+        public async Task<ActionResult<IEnumerable<AppointmentDto>>> GetAll()
         {
-            var list = await _appointments.GetAllWithRelationsAsync() ?? Enumerable.Empty<Appointment>();
-            return Ok(list.OrderBy(a => a.Date));
+            var list = await _appointments.GetAllAsync() ?? Enumerable.Empty<Appointment>();
+            return Ok(list.OrderBy(a => a.Date).Select(ToDto));
         }
 
         // GET: api/appointments/{id}
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Appointment>> GetById(int id)
+        public async Task<ActionResult<AppointmentDto>> GetById(int id)
         {
-            var appt = await _appointments.GetByIdWithRelationsAsync(id);
+            var appt = await _appointments.GetByIdAsync(id);
             if (appt == null) return NotFound();
-            return Ok(appt);
+            return Ok(ToDto(appt));
         }
 
         // GET: api/appointments/by-patient/{patientId}
         [HttpGet("by-patient/{patientId:int}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetByPatient(int patientId)
+        public async Task<ActionResult<IEnumerable<AppointmentDto>>> GetByPatient(int patientId)
         {
             var list = await _appointments.GetByPatientAsync(patientId) ?? Enumerable.Empty<Appointment>();
-            return Ok(list.OrderBy(a => a.Date));
+            return Ok(list.OrderBy(a => a.Date).Select(ToDto));
         }
 
         // GET: api/appointments/by-personnel/{personnelId}
         [HttpGet("by-personnel/{personnelId:int}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetByPersonnel(int personnelId)
+        public async Task<ActionResult<IEnumerable<AppointmentDto>>> GetByPersonnel(int personnelId)
         {
             var list = await _appointments.GetByPersonnelAsync(personnelId) ?? Enumerable.Empty<Appointment>();
-            return Ok(list.OrderBy(a => a.Date));
+            return Ok(list.OrderBy(a => a.Date).Select(ToDto));
         }
 
-        // POST: api/appointments
+        // POST: api/appointments (Booking endpoint)
+        // Patient books using an AvailableDay id. Marks the slot as booked by creating the appointment linked to that AvailableDay.
         [HttpPost]
-        public async Task<ActionResult<Appointment>> Create([FromBody] Appointment model)
+        public async Task<ActionResult<AppointmentDto>> Book([FromBody] BookAppointmentRequest request)
         {
-            if (model == null) return BadRequest();
-
-            ValidateAppointment(model);
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-            var ok = await _appointments.CreateAsync(model);
+            // Validate patient exists
+            var patient = await _patients.GetByIdAsync(request.PatientId);
+            if (patient == null) return NotFound($"Patient {request.PatientId} not found");
+
+            // Validate available day exists and is free
+            var day = await _days.GetByIdWithRelationsAsync(request.AvailableDayId);
+            if (day == null) return NotFound($"AvailableDay {request.AvailableDayId} not found");
+            if (day.Appointment != null) return Conflict("This slot is already booked");
+
+            var appt = new Appointment
+            {
+                Date = day.Date,
+                Notes = request.Notes,
+                PatientId = request.PatientId,
+                PersonnelId = day.PersonnelId,
+                AvailableDayId = day.Id
+            };
+
+            var ok = await _appointments.CreateAsync(appt);
             if (!ok)
             {
-                _logger.LogError("[AppointmentsController] Create failed {@Appointment}", model);
-                return Problem("Could not create appointment");
+                _logger.LogError("[AppointmentsController] Book failed {@Appointment}", appt);
+                return Problem("Could not book appointment");
             }
-            return CreatedAtAction(nameof(GetById), new { id = model.AppointmentId }, model);
+
+            return CreatedAtAction(nameof(GetById), new { id = appt.AppointmentId }, ToDto(appt));
         }
 
         // PUT: api/appointments/{id}
@@ -88,8 +116,12 @@ namespace HomeCareApi.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] Appointment model)
         {
             if (model == null || id != model.AppointmentId) return BadRequest("Id mismatch");
-
-            ValidateAppointment(model);
+            if (model.Date == default)
+                ModelState.AddModelError(nameof(model.Date), "Date is required.");
+            if (model.PersonnelId <= 0)
+                ModelState.AddModelError(nameof(model.PersonnelId), "PersonnelId is required.");
+            if (model.AvailableDayId <= 0)
+                ModelState.AddModelError(nameof(model.AvailableDayId), "AvailableDayId is required.");
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
             var ok = await _appointments.UpdateAsync(model);
@@ -108,20 +140,6 @@ namespace HomeCareApi.Controllers
             var ok = await _appointments.DeleteAsync(id);
             if (!ok) return NotFound();
             return NoContent();
-        }
-
-        private void ValidateAppointment(Appointment model)
-        {
-            if (model.Date == default)
-                ModelState.AddModelError(nameof(model.Date), "Date is required.");
-            if (model.Date < DateTime.UtcNow.AddMinutes(-1))
-                ModelState.AddModelError(nameof(model.Date), "Date must be in the future.");
-            if (model.PersonnelId <= 0)
-                ModelState.AddModelError(nameof(model.PersonnelId), "PersonnelId is required.");
-            if (model.AvailableDayId <= 0)
-                ModelState.AddModelError(nameof(model.AvailableDayId), "AvailableDayId is required.");
-            // Ensure the AvailableDay exists and is free
-            // (lightweight check – repository already handles persistence validations)
         }
     }
 }

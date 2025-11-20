@@ -20,5 +20,10 @@ namespace HomeCareApi.DAL
         //Med relasjoner
         Task<IEnumerable<AvailableDay>?> GetAllWithRelationsAsync();
         Task<AvailableDay?> GetByIdWithRelationsAsync(int id);
+
+        // Only free (bookable) slots
+        Task<IEnumerable<AvailableDay>?> GetFreeAsync();
+        Task<IEnumerable<AvailableDay>?> GetFreeByDateAsync(DateTime date);
+        Task<IEnumerable<AvailableDay>?> GetFreeByPersonnelAsync(int personnelId);
     }
 }

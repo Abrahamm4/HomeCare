@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HomeCareApi.DAL;
 using HomeCareApi.Models;
+using HomeCareApi.Models.Dto;
 
 namespace HomeCareApi.Controllers
 {
@@ -22,42 +23,78 @@ namespace HomeCareApi.Controllers
             _logger = logger;
         }
 
+        private static AvailableDayDto ToDto(AvailableDay d) => new()
+        {
+            Id = d.Id,
+            PersonnelId = d.PersonnelId,
+            Date = d.Date,
+            StartTime = d.StartTime,
+            EndTime = d.EndTime,
+            IsBooked = d.Appointment != null
+        };
+
         // GET: api/availabledays
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AvailableDay>>> GetAll()
+        public async Task<ActionResult<IEnumerable<AvailableDayDto>>> GetAll()
         {
             var list = await _days.GetAllWithRelationsAsync() ?? Enumerable.Empty<AvailableDay>();
-            return Ok(list.OrderBy(d => d.Date).ThenBy(d => d.StartTime));
+            return Ok(list.OrderBy(d => d.Date).ThenBy(d => d.StartTime).Select(ToDto));
+        }
+
+        // GET: api/availabledays/free
+        [HttpGet("free")]
+        public async Task<ActionResult<IEnumerable<AvailableDayDto>>> GetFree()
+        {
+            var list = await _days.GetFreeAsync() ?? Enumerable.Empty<AvailableDay>();
+            return Ok(list.OrderBy(d => d.Date).ThenBy(d => d.StartTime).Select(ToDto));
+        }
+
+        // GET: api/availabledays/free/by-date?date=2025-11-12
+        [HttpGet("free/by-date")]
+        public async Task<ActionResult<IEnumerable<AvailableDayDto>>> GetFreeByDate([FromQuery] DateTime date)
+        {
+            var list = await _days.GetFreeByDateAsync(date) ?? Enumerable.Empty<AvailableDay>();
+            return Ok(list.OrderBy(d => d.StartTime).Select(ToDto));
+        }
+
+        // GET: api/availabledays/free/by-personnel/3
+        [HttpGet("free/by-personnel/{personnelId:int}")]
+        public async Task<ActionResult<IEnumerable<AvailableDayDto>>> GetFreeByPersonnel(int personnelId)
+        {
+            var list = await _days.GetFreeByPersonnelAsync(personnelId) ?? Enumerable.Empty<AvailableDay>();
+            return Ok(list.OrderBy(d => d.Date).ThenBy(d => d.StartTime).Select(ToDto));
         }
 
         // GET: api/availabledays/{id}
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<AvailableDay>> GetById(int id)
+        public async Task<ActionResult<AvailableDayDto>> GetById(int id)
         {
             var day = await _days.GetByIdWithRelationsAsync(id);
             if (day == null) return NotFound();
-            return Ok(day);
+            return Ok(ToDto(day));
         }
 
         // GET: api/availabledays/by-date?date=2025-11-12
         [HttpGet("by-date")]
-        public async Task<ActionResult<IEnumerable<AvailableDay>>> GetByDate([FromQuery] DateTime date)
+        public async Task<ActionResult<IEnumerable<AvailableDayDto>>> GetByDate([FromQuery] DateTime date)
         {
-            var list = await _days.GetByDateAsync(date) ?? Enumerable.Empty<AvailableDay>();
-            return Ok(list);
+            var all = await _days.GetAllWithRelationsAsync() ?? Enumerable.Empty<AvailableDay>();
+            var list = all.Where(d => d.Date.Date == date.Date);
+            return Ok(list.OrderBy(d => d.StartTime).Select(ToDto));
         }
 
         // GET: api/availabledays/by-personnel/3
         [HttpGet("by-personnel/{personnelId:int}")]
-        public async Task<ActionResult<IEnumerable<AvailableDay>>> GetByPersonnel(int personnelId)
+        public async Task<ActionResult<IEnumerable<AvailableDayDto>>> GetByPersonnel(int personnelId)
         {
-            var list = await _days.GetByPersonnelAsync(personnelId) ?? Enumerable.Empty<AvailableDay>();
-            return Ok(list);
+            var all = await _days.GetAllWithRelationsAsync() ?? Enumerable.Empty<AvailableDay>();
+            var list = all.Where(d => d.PersonnelId == personnelId);
+            return Ok(list.OrderBy(d => d.Date).ThenBy(d => d.StartTime).Select(ToDto));
         }
 
         // POST: api/availabledays
         [HttpPost]
-        public async Task<ActionResult<AvailableDay>> Create([FromBody] AvailableDay model)
+        public async Task<ActionResult<AvailableDayDto>> Create([FromBody] AvailableDay model)
         {
             // basic validation
             if (model.Date.Date < DateTime.Today)
@@ -83,7 +120,7 @@ namespace HomeCareApi.Controllers
                 return Problem("Could not create available day");
             }
 
-            return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
+            return CreatedAtAction(nameof(GetById), new { id = model.Id }, ToDto(model));
         }
 
         // PUT: api/availabledays/{id}

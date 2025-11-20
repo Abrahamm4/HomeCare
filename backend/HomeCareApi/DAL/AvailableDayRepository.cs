@@ -171,5 +171,61 @@ namespace HomeCareApi.DAL
                 return null;
             }
         }
+
+        // Only free (bookable) slots = no appointment linked
+        public async Task<IEnumerable<AvailableDay>?> GetFreeAsync()
+        {
+            try
+            {
+                var list = await _db.AvailableDays
+                                    .AsNoTracking()
+                                    .Where(d => d.Appointment == null)
+                                    .ToListAsync();
+                return list.OrderBy(d => d.Date).ThenBy(d => d.StartTime);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "[AvailableDayRepository] GetFreeAsync failed");
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<AvailableDay>?> GetFreeByDateAsync(DateTime date)
+        {
+            try
+            {
+                var start = date.Date;
+                var end = start.AddDays(1);
+
+                var list = await _db.AvailableDays
+                                    .AsNoTracking()
+                                    .Where(d => d.Appointment == null && d.Date >= start && d.Date < end)
+                                    .ToListAsync();
+
+                return list.OrderBy(d => d.StartTime);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "[AvailableDayRepository] GetFreeByDateAsync failed for Date {Date}", date);
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<AvailableDay>?> GetFreeByPersonnelAsync(int personnelId)
+        {
+            try
+            {
+                var list = await _db.AvailableDays
+                                    .AsNoTracking()
+                                    .Where(d => d.PersonnelId == personnelId && d.Appointment == null)
+                                    .ToListAsync();
+                return list.OrderBy(d => d.Date).ThenBy(d => d.StartTime);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "[AvailableDayRepository] GetFreeByPersonnelAsync failed for PersonnelId {PersonnelId:0000}", personnelId);
+                return null;
+            }
+        }
     }
 }

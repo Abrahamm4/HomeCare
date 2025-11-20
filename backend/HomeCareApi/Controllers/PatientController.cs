@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HomeCareApi.DAL;
 using HomeCareApi.Models;
+using HomeCareApi.Models.Dto;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -22,26 +23,34 @@ namespace HomeCareApi.Controllers
             _logger = logger;
         }
 
+        private static PatientDto ToDto(Patient p) => new()
+        {
+            PatientId = p.PatientId,
+            Name = p.Name,
+            Phone = p.Phone,
+            Email = p.Email
+        };
+
         // GET: api/patient
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetAll()
+        public async Task<ActionResult<IEnumerable<PatientDto>>> GetAll()
         {
             var patients = await _repo.GetAllAsync() ?? Enumerable.Empty<Patient>();
-            return Ok(patients);
+            return Ok(patients.Select(ToDto));
         }
 
         // GET: api/patient/{id}
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Patient>> GetById(int id)
+        public async Task<ActionResult<PatientDto>> GetById(int id)
         {
             var patient = await _repo.GetByIdAsync(id);
             if (patient == null) return NotFound();
-            return Ok(patient);
+            return Ok(ToDto(patient));
         }
 
         // POST: api/patient
         [HttpPost]
-        public async Task<ActionResult<Patient>> Create([FromBody] Patient model)
+        public async Task<ActionResult<PatientDto>> Create([FromBody] Patient model)
         {
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var success = await _repo.CreateAsync(model);
@@ -50,7 +59,7 @@ namespace HomeCareApi.Controllers
                 _logger.LogError("[PatientController] Create failed for {@Patient}", model);
                 return Problem("Could not create patient");
             }
-            return CreatedAtAction(nameof(GetById), new { id = model.PatientId }, model);
+            return CreatedAtAction(nameof(GetById), new { id = model.PatientId }, ToDto(model));
         }
 
         // PUT: api/patient/{id}
