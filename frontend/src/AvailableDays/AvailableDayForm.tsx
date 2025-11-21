@@ -1,0 +1,99 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Form, Button } from "react-bootstrap";
+import type { AvailableDay } from "../types/AvailableDay";
+
+interface AvailableDaysFormProps {
+  onAvailableDayChanged: (newDay: AvailableDay) => void;
+  availableDayId?: number;
+  isUpdate?: boolean;
+  initialData?: AvailableDay;
+}
+
+const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
+  onAvailableDayChanged,
+  availableDayId,
+  isUpdate = false,
+  initialData,
+}) => {
+  const [personnelId, setPersonnelId] = useState<string>(
+    initialData?.personnelId.toString() || ""
+  );
+  const [date, setDate] = useState<string>(initialData?.date || "");
+  const [startTime, setStartTime] = useState<string>(initialData?.startTime || "");
+  const [endTime, setEndTime] = useState<string>(initialData?.endTime || "");
+  const navigate = useNavigate();
+
+  const onCancel = () => {
+    navigate(-1);
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const availableDay: AvailableDay = {
+      id: availableDayId || 0,
+      personnelId: Number(personnelId),
+      date,
+      startTime,
+      endTime,
+      appointment: initialData?.appointment || null,
+    };
+
+    onAvailableDayChanged(availableDay);
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Form.Group controlId="formPersonnelId" className="mb-3">
+        <Form.Label>Personnel ID</Form.Label>
+        <Form.Control
+          type="number"
+          placeholder="Enter Personnel ID"
+          value={personnelId}
+          onChange={(e) => setPersonnelId(e.target.value)}
+          required
+        />
+      </Form.Group>
+
+      <Form.Group controlId="formDate" className="mb-3">
+        <Form.Label>Date</Form.Label>
+        <Form.Control
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+        />
+      </Form.Group>
+
+      <Form.Group controlId="formStartTime" className="mb-3">
+        <Form.Label>Start Time</Form.Label>
+        <Form.Control
+          type="time"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+          required
+        />
+      </Form.Group>
+
+      <Form.Group controlId="formEndTime" className="mb-3">
+        <Form.Label>End Time</Form.Label>
+        <Form.Control
+          type="time"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+          required
+        />
+      </Form.Group>
+
+      <Button variant="primary" type="submit">
+        {isUpdate ? "Update Available Day" : "Create Available Day"}
+      </Button>
+      <Button variant="secondary" onClick={onCancel} className="ms-2">
+        Cancel
+      </Button>
+    </Form>
+  );
+};
+
+export default AvailableDaysForm;

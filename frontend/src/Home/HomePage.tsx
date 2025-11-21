@@ -5,16 +5,28 @@ import {useNavigate} from 'react-router-dom';
 const HomePage: React.FC=() => {
     const navigate=useNavigate();
     return (
-        <Container>
-            <h1>HomeCare Appointment</h1>
+        <Container className="mt-5 text-center">
+            <h1 className="text-center">HomeCare Appointment</h1>
             <Row>
-                {/*Card?*/}
+                {/*Appointments Card*/}
+                <Col>
+                <Card>
+                <Card.Body>
+                <Card.Title>Book Appointment</Card.Title>
+                <Card.Text>Look through appointments and book</Card.Text>
+                <Button onClick={()=>navigate("/appointment")}
+                    >Go to Appointments
+                </Button>
+                </Card.Body>
+                </Card>
+                </Col>
+                {/*Available Day card*/}
                 <Col>
                 <Card>
                 <Card.Body>
                 <Card.Title>Available Days</Card.Title>
                 <Card.Text>View current available days, create new ones</Card.Text>
-                <Button onClick={()=>navigate("/available-days")}
+                <Button onClick={()=>navigate("/availabledays")}
                     >Go to Available Days
                 </Button>
                 </Card.Body>
@@ -22,10 +34,6 @@ const HomePage: React.FC=() => {
                 </Col>
 
             </Row>
-
-            <ul>
-                <li>AvailableDays</li>
-            </ul>
         </Container>
     )
 }

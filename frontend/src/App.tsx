@@ -1,18 +1,21 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Container from 'react-bootstrap/Container'
 import './App.css'
-import HomePage from './Home/HomePage'
-import AvailableDaysPage from './AvailableDays/AvailableDays'
 import NavMenu from './shared/NavMenu'
+import HomePage from './Home/HomePage'
+// Available Days
+import AvailableDaysListPage from './AvailableDays/AvailableDayListPage'
+import AvailableDayCreatePage from './AvailableDays/AvailableDayCreatePage'
+import AvailableDayUpdatePage from './AvailableDays/AvailableDayUpdatePage'
+// Appointment
+import AppointmentListPage from './Appointment/AppointmentListPage'
+import AppointmentCreatePage from './Appointment/AppointmentCreatePage'
+import AppointmentUpdatePage from './Appointment/AppointmentUpdatePage'
+// Patients
 import PatientListPage from './Patient/PatientListPage'
 import PatientCreatePage from './Patient/PatientCreatePage'
 import PatientUpdatePage from './Patient/PatientUpdatePage'
-import PersonnelListpage from './Personnel/PersonnelListPage'
-import PersonnelUpdatepage from './Personnel/PersonnelUpdatePage'
-import PersonnelCreatepage from './Personnel/PersonnelCreatePage'
+// Personnel
 import PersonnelListPage from './Personnel/PersonnelListPage'
 import PersonnelCreatePage from './Personnel/PersonnelCreatePage'
 import PersonnelUpdatePage from './Personnel/PersonnelUpdatePage'
@@ -21,11 +24,17 @@ const App: React.FC=() => {
   return(
     <Router>
     <NavMenu />
-    <Container>
+    <Container className="mt-3">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/available-days" element={<AvailableDaysPage />} />
-          <Route path="*" element={<Navigate to ="/" replace />} />
+                    {/* Available Days pages */}
+          <Route path="/availabledays" element={<AvailableDaysListPage />} />
+          <Route path="/availabledayscreate" element={<AvailableDayCreatePage />} />
+          <Route path="/availabledaysupdate" element={<AvailableDayUpdatePage />} />
+                    {/* Appointment pages */}
+          <Route path="/appointment" element={<AppointmentListPage />} />
+          <Route path="/appointmentcreate" element={<AppointmentCreatePage />} />
+          <Route path="/appointmentupdate" element={<AppointmentUpdatePage />} />
                     {/* Patient pages */}
           <Route path="/patients" element={<PatientListPage />} />
           <Route path="/patientcreate" element={<PatientCreatePage />} />
@@ -34,6 +43,8 @@ const App: React.FC=() => {
           <Route path="/personnels" element={<PersonnelListPage />} />
           <Route path="/personnelcreate" element={<PersonnelCreatePage />} />
           <Route path="/personnelupdate/:personnelId" element={<PersonnelUpdatePage />} />
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </Container>
 </Router>

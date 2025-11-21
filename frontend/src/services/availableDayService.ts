@@ -1,4 +1,4 @@
-import type {AvailableDay} from '../types/AvailableDay';
+/*import type {AvailableDay} from '../types/AvailableDay';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,4 +19,4 @@ export const updateAvailableDay = async (day: AvailableDay) => {
   if (!res.ok) throw new Error("Failed to update available day");
   return await res.json();
 };
-console.log("FETCHING:", `${API_URL}/api/AvailableDays`);
+console.log("FETCHING:", `${API_URL}/api/AvailableDays`);*/
