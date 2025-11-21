@@ -1,9 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Container from 'react-bootstrap/Container'
 import './App.css'
+import NavMenu from './shared/NavMenu'
+import HomePage from './Home/HomePage'
+// Available Days
+import AvailableDaysListPage from './AvailableDays/AvailableDayListPage'
+import AvailableDayCreatePage from './AvailableDays/AvailableDayCreatePage'
+import AvailableDayUpdatePage from './AvailableDays/AvailableDayUpdatePage'
+// Appointment
+import AppointmentListPage from './Appointment/AppointmentListPage'
+import AppointmentCreatePage from './Appointment/AppointmentCreatePage'
+import AppointmentUpdatePage from './Appointment/AppointmentUpdatePage'
+// Patients
+import PatientListPage from './Patient/PatientListPage'
+import PatientCreatePage from './Patient/PatientCreatePage'
+import PatientUpdatePage from './Patient/PatientUpdatePage'
+// Personnel
+import PersonnelListPage from './Personnel/PersonnelListPage'
+import PersonnelCreatePage from './Personnel/PersonnelCreatePage'
+import PersonnelUpdatePage from './Personnel/PersonnelUpdatePage'
 
-function App() {
+const App: React.FC=() => {
+  return(
+    <Router>
+    <NavMenu />
+    <Container className="mt-3">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+                    {/* Available Days pages */}
+          <Route path="/availabledays" element={<AvailableDaysListPage />} />
+          <Route path="/availabledayscreate" element={<AvailableDayCreatePage />} />
+          <Route path="/availabledaysupdate" element={<AvailableDayUpdatePage />} />
+                    {/* Appointment pages */}
+          <Route path="/appointment" element={<AppointmentListPage />} />
+          <Route path="/appointmentcreate" element={<AppointmentCreatePage />} />
+          <Route path="/appointmentupdate" element={<AppointmentUpdatePage />} />
+                    {/* Patient pages */}
+          <Route path="/patients" element={<PatientListPage />} />
+          <Route path="/patientcreate" element={<PatientCreatePage />} />
+          <Route path="/patientupdate/:patientId" element={<PatientUpdatePage />} />
+                    {/* Personnel pages */}   
+          <Route path="/personnels" element={<PersonnelListPage />} />
+          <Route path="/personnelcreate" element={<PersonnelCreatePage />} />
+          <Route path="/personnelupdate/:personnelId" element={<PersonnelUpdatePage />} />
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    </Container>
+</Router>
+  )
+}
+export default App
+/*function App() {
   const [count, setCount] = useState(0)
 
   return (
@@ -33,3 +81,4 @@ function App() {
 }
 
 export default App
+*/
