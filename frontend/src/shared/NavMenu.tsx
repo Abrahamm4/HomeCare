@@ -13,8 +13,8 @@ const NavMenu: React.FC = () => {
         <Navbar.Collapse id="nav">
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
-            <Nav.Link href="/appointments">Appointment</Nav.Link>
-            <Nav.Link href="/available-days">Available Days</Nav.Link>
+            <Nav.Link href="/appointment">Appointment</Nav.Link>
+            <Nav.Link href="/availabledays">Available Days</Nav.Link>
             <Nav.Link href="/patients">Patients</Nav.Link>
             <Nav.Link href="/personnels">Personnel</Nav.Link>
           </Nav>

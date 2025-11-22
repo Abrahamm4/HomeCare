@@ -28,7 +28,7 @@ const handleResponse = async (response: Response) => {
 // ----------- GET ALL -----------
 // GET: /AvailableDays
 export const fetchAvailableDays = async (): Promise<AvailableDay[]> => {
-  const response = await fetch(`${API_URL}/backend/HomeCareApi/AvailableDays`);
+  const response = await fetch(`${API_URL}/api/AvailableDays`);
   return handleResponse(response);
 };
 
@@ -38,7 +38,7 @@ export const fetchAvailableDayById = async (
   availableDayId: number
 ): Promise<AvailableDay> => {
   const response = await fetch(
-    `${API_URL}/backend/HomeCareApi/AvailableDays/${availableDayId}`
+    `${API_URL}/api/AvailableDays/${availableDayId}`
   );
   return handleResponse(response);
 };
@@ -49,7 +49,7 @@ export const fetchAvailableDaysByDate = async (
   date: string
 ): Promise<AvailableDay[]> => {
   const response = await fetch(
-    `${API_URL}/backend/HomeCareApi/AvailableDays/by-date?date=${date}`
+    `${API_URL}/api/AvailableDays/by-date?date=${date}`
   );
   return handleResponse(response);
 };
@@ -60,7 +60,7 @@ export const fetchAvailableDaysByPersonnel = async (
   personnelId: number
 ): Promise<AvailableDay[]> => {
   const response = await fetch(
-    `${API_URL}/backend/HomeCareApi/AvailableDays/by-personnel/${personnelId}`
+    `${API_URL}/api/AvailableDays/by-personnel/${personnelId}`
   );
   return handleResponse(response);
 };
@@ -71,7 +71,7 @@ export const createAvailableDay = async (
   availableDay: AvailableDay
 ): Promise<AvailableDay> => {
   const response = await fetch(
-    `${API_URL}/backend/HomeCareApi/AvailableDays`,
+    `${API_URL}/api/AvailableDays`,
     {
       method: "POST",
       headers: getAuthHeaders(),
@@ -88,7 +88,7 @@ export const updateAvailableDay = async (
   availableDay: AvailableDay
 ): Promise<AvailableDay | null> => {
   const response = await fetch(
-    `${API_URL}/backend/HomeCareApi/AvailableDays/${availableDayId}`,
+    `${API_URL}/api/AvailableDays/${availableDayId}`,
     {
       method: "PUT",
       headers: getAuthHeaders(),
@@ -102,7 +102,7 @@ export const updateAvailableDay = async (
 // DELETE: /AvailableDays/{id}
 export const deleteAvailableDay = async (availableDayId: number) => {
   const response = await fetch(
-    `${API_URL}/backend/HomeCareApi/AvailableDays/${availableDayId}`,
+    `${API_URL}/api/AvailableDays/${availableDayId}`,
     {
       method: "DELETE",
       headers: getAuthHeaders(),

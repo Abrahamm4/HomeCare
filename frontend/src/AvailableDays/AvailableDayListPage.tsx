@@ -30,13 +30,15 @@ const AvailableDayListPage: React.FC = () => {
     fetchDays();
   }, []);
 
-  const filteredDays = days.filter((d) =>
-    (
-      d.date.toLowerCase() +
-      " " +
-      String(d.personnelId)
-    ).includes(searchQuery.toLowerCase())
-  );
+const filteredDays = days.filter((d) => {
+  const q = searchQuery.trim().toLowerCase();
+
+  if (/^\d$/.test(q)) {
+    return d.personnelId === Number(q);
+  }
+
+  return d.date.toLowerCase().includes(q);
+});
 
   const handleDayDeleted = async (id: number) => {
     const confirmDelete = window.confirm(
@@ -68,7 +70,9 @@ const AvailableDayListPage: React.FC = () => {
 
       <Form.Group className="mb-3">
         <Form.Control
+          id="availableDaySearch"
           type="text"
+          name="availableDaySearch"
           placeholder="Search by date or personnel ID"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -82,7 +86,7 @@ const AvailableDayListPage: React.FC = () => {
         onDayDeleted={handleDayDeleted}
       />
 
-      <Button href="/available-days/create" className="btn btn-secondary mt-3">
+      <Button href="/availabledayscreate" className="btn btn-secondary mt-3">
         Add New Available Day
       </Button>
     </div>

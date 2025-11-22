@@ -19,7 +19,9 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
   const [personnelId, setPersonnelId] = useState<string>(
     initialData?.personnelId.toString() || ""
   );
-  const [date, setDate] = useState<string>(initialData?.date || "");
+  const [date, setDate] = useState<string>(
+  initialData?.date ? initialData.date.split("T")[0] : ""
+  );
   const [startTime, setStartTime] = useState<string>(initialData?.startTime || "");
   const [endTime, setEndTime] = useState<string>(initialData?.endTime || "");
   const navigate = useNavigate();
@@ -32,12 +34,11 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
     event.preventDefault();
 
     const availableDay: AvailableDay = {
-      id: availableDayId || 0,
+      ...(isUpdate && {id: Number(availableDayId)}),
       personnelId: Number(personnelId),
       date,
       startTime,
       endTime,
-      appointment: initialData?.appointment || null,
     };
 
     onAvailableDayChanged(availableDay);

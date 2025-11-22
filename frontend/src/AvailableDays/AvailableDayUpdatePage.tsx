@@ -5,7 +5,7 @@ import type { AvailableDay } from '../types/AvailableDay';
 import * as AvailableDayService from './AvailableDayService';
 
 const AvailableDayUpdatePage: React.FC = () => {
-  const { AvailableDayId } = useParams<{ AvailableDayId: string }>();
+  const { availableDayId } = useParams<{ availableDayId: string }>();
   const navigate = useNavigate();
   const [day, setAvailableDay] = useState<AvailableDay | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -14,12 +14,12 @@ const AvailableDayUpdatePage: React.FC = () => {
   useEffect(() => {
     const fetchDay = async () => {
       try {
-        if (!AvailableDayId) {
+        if (!availableDayId) {
           setError('No AvailableDay id provided');
           setLoading(false);
           return;
         }
-        const data = await AvailableDayService.fetchAvailableDayById(Number(AvailableDayId));
+        const data = await AvailableDayService.fetchAvailableDayById(Number(availableDayId));
         setAvailableDay(data);
       } catch (error) {
         setError('Failed to fetch AvailableDay');
@@ -30,11 +30,11 @@ const AvailableDayUpdatePage: React.FC = () => {
     };
 
     fetchDay();
-  }, [AvailableDayId]);
+  }, [availableDayId]);
 
   const handleAvailableDayUpdated = async (updated: AvailableDay) => {
     try {
-      const data = await AvailableDayService.updateAvailableDay(Number(AvailableDayId), updated);
+      const data = await AvailableDayService.updateAvailableDay(Number(availableDayId), updated);
       console.log('AvailableDay updated successfully:', data);
       navigate('/AvailableDays');
     } catch (error) {

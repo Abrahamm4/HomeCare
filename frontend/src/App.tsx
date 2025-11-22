@@ -30,11 +30,11 @@ const App: React.FC=() => {
                     {/* Available Days pages */}
           <Route path="/availabledays" element={<AvailableDaysListPage />} />
           <Route path="/availabledayscreate" element={<AvailableDayCreatePage />} />
-          <Route path="/availabledaysupdate" element={<AvailableDayUpdatePage />} />
+          <Route path="/availabledays/edit/:availableDayId" element={<AvailableDayUpdatePage />} />
                     {/* Appointment pages */}
           <Route path="/appointment" element={<AppointmentListPage />} />
           <Route path="/appointmentcreate" element={<AppointmentCreatePage />} />
-          <Route path="/appointmentupdate" element={<AppointmentUpdatePage />} />
+          <Route path="/appointmentupdate/:AppointmentId" element={<AppointmentUpdatePage />} />
                     {/* Patient pages */}
           <Route path="/patients" element={<PatientListPage />} />
           <Route path="/patientcreate" element={<PatientCreatePage />} />

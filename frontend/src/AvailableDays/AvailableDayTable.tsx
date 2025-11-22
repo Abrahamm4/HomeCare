@@ -34,7 +34,7 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
                         >
                             Edit
                             </Button>
-                        <Button variant="danger" onClick={()=> onDayDeleted && onDayDeleted(d.id)}
+                        <Button variant="danger" onClick={()=> d.id && onDayDeleted?.(d.id)}
                         >
                             Delete
                         </Button>
