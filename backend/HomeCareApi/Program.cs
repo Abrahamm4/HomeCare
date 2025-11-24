@@ -1,8 +1,13 @@
 using HomeCareApi.DAL;
 using HomeCareApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 
 namespace HomeCareApi
 {
@@ -40,11 +45,58 @@ namespace HomeCareApi
             {
                 // Example: configure serializer settings
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            }); 
+            });
 
             // Database (SQLite)
             builder.Services.AddDbContext<HomeCareDbContext>(options =>
                 options.UseSqlite(builder.Configuration["ConnectionStrings:HomeCareDbContextConnection"]));
+
+            // Database (Authentication) 
+            builder.Services.AddDbContext<AuthDbContext>(options =>
+            {
+                options.UseSqlite(builder.Configuration["ConnectionStrings:AuthDbContextConnection"]);
+            });
+
+            builder.Services.AddIdentity<AuthUser, IdentityRole>()
+                .AddEntityFrameworkStores<AuthDbContext>()
+                .AddDefaultTokenProviders();
+
+            // CORS (Frontend access control)
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
+            // Authentication: JWT Bearer
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+                    )
+                };
+            });
+
+            builder.Services.AddAuthorization();
 
             // Repositories (DI)
             builder.Services.AddScoped<IAvailableDayRepository, AvailableDayRepository>();
@@ -54,7 +106,36 @@ namespace HomeCareApi
 
             // Swagger (API documentation)
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "HomeCare API", Version = "v1" });
+
+                // Add Bearer token support in Swagger
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer <your-token>'"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+           {
+                {
+                    new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+                  new string[] {}
+                }
+             });
+            });
+
 
             // CORS (Cross-Origin Resource Sharing)
             builder.Services.AddCors(options =>
@@ -95,7 +176,8 @@ namespace HomeCareApi
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("CorsPolicy");
+            app.UseCors("AllowFrontend");
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
 
