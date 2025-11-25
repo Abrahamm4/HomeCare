@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import type { LoginDto, RegisterDto } from "../types/Auth";
 import type { User } from "../types/User";
 
-const API_BASE_URL = "https://localhost:7193/api"; //Can be changed after backend is done
+const API_BASE_URL = "https://localhost:7272"; //Can be changed after backend is done
 const TOKEN_KEY = "homecare_jwt";
 
 interface AuthResponse {
@@ -34,7 +34,7 @@ export function decodeToken(token: string | null): User | null {
 export async function login(
   dto: LoginDto
 ): Promise<{ token: string; user: User }> {
-  const response = await fetch(`${API_BASE_URL}/Auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/api/Auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dto),
@@ -55,7 +55,7 @@ export async function login(
 }
 
 export async function register(dto: RegisterDto): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/Auth/register`, {
+  const response = await fetch(`${API_BASE_URL}/api/Auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dto),
