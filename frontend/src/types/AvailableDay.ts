@@ -1,13 +1,20 @@
-import type { Personnel } from "../types/Personnel";
-import type { Appointment } from "../types/Appointment";
+import type { Personnel } from "./Personnel";
+import type { Appointment } from "./Appointment";
 
 export interface AvailableDay{
-    id?: number;
+    id: number;
     personnelId: number;
     date: string;
     startTime: string;
     endTime: string;
+    isBooked?: boolean;
 
     personnel?: Personnel;
     appointments?: Appointment[];
+}
+export interface AvailableDayInput {
+  personnelId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
 }

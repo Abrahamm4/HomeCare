@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import type { AvailableDay } from "../types/AvailableDay";
 import * as AvailableDayService from "./AvailableDayService";
 import AvailableDayTable from "./AvailableDayTable";
 
 const AvailableDayListPage: React.FC = () => {
   const [days, setDays] = useState<AvailableDay[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showOnlyFree, setShowOnlyFree] = useState(false);
+
+  const navigate = useNavigate();
 
   const fetchDays = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const data = await AvailableDayService.fetchAvailableDays();
+      let data = await AvailableDayService.fetchAvailableDays();
+      if (showOnlyFree) data = data.filter((d) => !d.isBooked);
       setDays(data);
-      console.log(data);
-    } catch (error: unknown) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       setError("Failed to fetch available days.");
     } finally {
       setLoading(false);
@@ -28,31 +31,24 @@ const AvailableDayListPage: React.FC = () => {
 
   useEffect(() => {
     fetchDays();
-  }, []);
+  }, [showOnlyFree]);
 
-const filteredDays = days.filter((d) => {
-  const q = searchQuery.trim().toLowerCase();
-
-  if (/^\d$/.test(q)) {
-    return d.personnelId === Number(q);
-  }
-
-  return d.date.toLowerCase().includes(q);
-});
+  const filteredDays = days.filter((d) => {
+    const q = searchQuery.trim().toLowerCase();
+    return (
+      d.date.toLowerCase().includes(q) ||
+      d.personnelId.toString().includes(q)
+    );
+  });
 
   const handleDayDeleted = async (id: number) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete AvailableDay ${id}?`
-    );
-    if (!confirmDelete) return;
-
+    if (!window.confirm(`Delete slot ${id}?`)) return;
     try {
       await AvailableDayService.deleteAvailableDay(id);
       setDays((prev) => prev.filter((d) => d.id !== id));
-      console.log("Deleted AvailableDay:", id);
-    } catch (error) {
-      console.error("Error deleting AvailableDay:", error);
-      setError("Failed to delete AvailableDay.");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete available day.");
     }
   };
 
@@ -60,24 +56,39 @@ const filteredDays = days.filter((d) => {
     <div>
       <h1>Available Days</h1>
 
-      <Button
-        onClick={fetchDays}
-        className="btn btn-primary mb-3 me-2"
-        disabled={loading}
-      >
-        {loading ? "Loading..." : "Refresh"}
-      </Button>
+      <div className="mb-3">
+        <Button
+          variant="primary"
+          className="me-2"
+          onClick={fetchDays}
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Refresh"}
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/availabledayscreate")}
+        >
+          Add New Available Day
+        </Button>
+      </div>
 
       <Form.Group className="mb-3">
         <Form.Control
-          id="availableDaySearch"
           type="text"
-          name="availableDaySearch"
           placeholder="Search by date or personnel ID"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </Form.Group>
+
+      <Form.Check
+        type="checkbox"
+        label="Show only free slots"
+        checked={showOnlyFree}
+        onChange={(e) => setShowOnlyFree(e.target.checked)}
+        className="mb-3"
+      />
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
@@ -85,10 +96,6 @@ const filteredDays = days.filter((d) => {
         days={filteredDays}
         onDayDeleted={handleDayDeleted}
       />
-
-      <Button href="/availabledayscreate" className="btn btn-secondary mt-3">
-        Add New Available Day
-      </Button>
     </div>
   );
 };

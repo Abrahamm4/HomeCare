@@ -1,4 +1,4 @@
-import type { AvailableDay } from "../types/AvailableDay";
+import type { AvailableDay, AvailableDayInput } from "../types/AvailableDay";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -26,87 +26,65 @@ const handleResponse = async (response: Response) => {
 };
 
 // ----------- GET ALL -----------
-// GET: /AvailableDays
 export const fetchAvailableDays = async (): Promise<AvailableDay[]> => {
   const response = await fetch(`${API_URL}/api/AvailableDays`);
   return handleResponse(response);
 };
 
 // ----------- GET BY ID -----------
-// GET: /AvailableDays/{id}
 export const fetchAvailableDayById = async (
   availableDayId: number
 ): Promise<AvailableDay> => {
-  const response = await fetch(
-    `${API_URL}/api/AvailableDays/${availableDayId}`
-  );
+  const response = await fetch(`${API_URL}/api/AvailableDays/${availableDayId}`);
   return handleResponse(response);
 };
 
 // ----------- GET BY DATE -----------
-// GET: /AvailableDays/by-date?date=YYYY-MM-DD
 export const fetchAvailableDaysByDate = async (
   date: string
 ): Promise<AvailableDay[]> => {
-  const response = await fetch(
-    `${API_URL}/api/AvailableDays/by-date?date=${date}`
-  );
+  const response = await fetch(`${API_URL}/api/AvailableDays/by-date?date=${date}`);
   return handleResponse(response);
 };
 
 // ----------- GET BY PERSONNEL -----------
-// GET: /AvailableDays/by-personnel/{personnelId}
 export const fetchAvailableDaysByPersonnel = async (
   personnelId: number
 ): Promise<AvailableDay[]> => {
-  const response = await fetch(
-    `${API_URL}/api/AvailableDays/by-personnel/${personnelId}`
-  );
+  const response = await fetch(`${API_URL}/api/AvailableDays/by-personnel/${personnelId}`);
   return handleResponse(response);
 };
 
 // ----------- CREATE -----------
-// POST: /AvailableDays
 export const createAvailableDay = async (
-  availableDay: AvailableDay
+  availableDay: AvailableDayInput
 ): Promise<AvailableDay> => {
-  const response = await fetch(
-    `${API_URL}/api/AvailableDays`,
-    {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(availableDay),
-    }
-  );
+  const response = await fetch(`${API_URL}/api/AvailableDays`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(availableDay),
+  });
   return handleResponse(response);
 };
 
 // ----------- UPDATE -----------
-// PUT: /AvailableDays/{id}
 export const updateAvailableDay = async (
   availableDayId: number,
-  availableDay: AvailableDay
+  availableDay: AvailableDayInput
 ): Promise<AvailableDay | null> => {
-  const response = await fetch(
-    `${API_URL}/api/AvailableDays/${availableDayId}`,
-    {
-      method: "PUT",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(availableDay),
-    }
-  );
+  const response = await fetch(`${API_URL}/api/AvailableDays/${availableDayId}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(availableDay),
+  });
   return handleResponse(response);
 };
 
 // ----------- DELETE -----------
-// DELETE: /AvailableDays/{id}
 export const deleteAvailableDay = async (availableDayId: number) => {
-  const response = await fetch(
-    `${API_URL}/api/AvailableDays/${availableDayId}`,
-    {
-      method: "DELETE",
-      headers: getAuthHeaders(),
-    }
-  );
+  const response = await fetch(`${API_URL}/api/AvailableDays/${availableDayId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
   return handleResponse(response);
 };

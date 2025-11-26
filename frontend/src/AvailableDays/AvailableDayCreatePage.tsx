@@ -7,19 +7,19 @@ import * as AvailableDayService from './AvailableDayService';
 const AvailableDayCreatePage: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleAvailableDayCreated = async (AvailableDay: AvailableDay) => {
+  const handleAvailableDayCreated = async (day: AvailableDay) => {
     try {
-      const data = await AvailableDayService.createAvailableDay(AvailableDay);
-      console.log('AvailableDay created successfully:', data);
-      navigate('/availableDays'); // tilbake til liste
+      const created = await AvailableDayService.createAvailableDay(day);
+      console.log('AvailableDay created successfully:', created);
+      navigate('/availabledays');
     } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
+      console.error('Create AvailableDay failed:', error);
     }
   };
 
   return (
     <div>
-      <h2>Create New AvailableDay</h2>
+      <h2>Create New Available Day</h2>
       <AvailableDaysForm onAvailableDayChanged={handleAvailableDayCreated} />
     </div>
   );
