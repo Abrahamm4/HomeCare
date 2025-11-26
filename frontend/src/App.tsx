@@ -47,9 +47,7 @@ const App: React.FC = () => {
             <Route
               path="/availabledays"
               element={
-                <ProtectedRoute>
                   <AvailableDaysListPage />
-                </ProtectedRoute>
               }
             />
             <Route
@@ -73,9 +71,7 @@ const App: React.FC = () => {
             <Route
               path="/appointment"
               element={
-                <ProtectedRoute>
                   <AppointmentListPage />
-                </ProtectedRoute>
               }
             />
             <Route
