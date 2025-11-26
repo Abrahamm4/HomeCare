@@ -41,7 +41,8 @@ export async function login(
   });
 
   if (!response.ok) {
-    throw new Error("Login failed");
+    const errorText = await response.text();
+    throw new Error(errorText || "Login failed");
   }
 
   const data = (await response.json()) as AuthResponse;
@@ -62,7 +63,8 @@ export async function register(dto: RegisterDto): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error("Registration failed");
+    const errorText = await response.text();
+    throw new Error(errorText || "Registration failed");
   }
 }
 

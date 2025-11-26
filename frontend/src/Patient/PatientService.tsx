@@ -28,7 +28,7 @@ const handleResponse = async (response: Response) => {
     if (response.status === 401) {
       const errorText = await response.text();
       throw new Error(
-        errorText || "Unauthorized – please log in again."
+        errorText || "Unauthorized - please log in again."
       );
     }
 
