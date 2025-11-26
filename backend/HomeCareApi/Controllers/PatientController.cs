@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HomeCareApi.Controllers
 {
@@ -32,6 +33,7 @@ namespace HomeCareApi.Controllers
         };
 
         // GET: api/patient
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PatientDto>>> GetAll()
         {

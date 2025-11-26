@@ -99,9 +99,7 @@ const App: React.FC = () => {
             <Route
               path="/patients"
               element={
-                <ProtectedRoute>
-                  <PatientListPage />
-                </ProtectedRoute>
+                 <PatientListPage />
               }
             />
             <Route
