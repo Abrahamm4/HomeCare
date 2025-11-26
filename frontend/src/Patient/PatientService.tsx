@@ -18,7 +18,6 @@ const getAuthHeaders = (): HeadersInit => {
 
 const handleResponse = async (response: Response) => {
   if (response.ok) {
-    // HTTP 2xx
     if (response.status === 204) {
       // NoContent (delete / update)
       return null;

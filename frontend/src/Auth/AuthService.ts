@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import type { LoginDto, RegisterDto } from "../types/Auth";
 import type { User } from "../types/User";
 
-const API_BASE_URL = "https://localhost:7272"; //Can be changed after backend is done
+const API_BASE_URL = "https://localhost:7272"; //Can be changed according to backend 
 const TOKEN_KEY = "homecare_jwt";
 
 interface AuthResponse {

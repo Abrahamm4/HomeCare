@@ -1,7 +1,7 @@
 export interface User {
-  sub: string;      // brukernavn
-  nameid: string;   // userId i databasen 
-  jti: string;      // unik id for tokenet
+  sub: string;      // Username
+  nameid: string;   // userId in the db 
+  jti: string;      // uniq id for tokenet
   iat: number;      // issued at (seconds since epoch)
   exp: number;      // expires at (seconds since epoch)
   iss: string;      // issuer

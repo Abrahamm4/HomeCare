@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Table, Button } from "react-bootstrap";
 import type { Patient } from "../types/Patient";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
 
 interface PatientTableProps {
