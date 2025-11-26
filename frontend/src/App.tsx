@@ -9,8 +9,12 @@ import AvailableDayCreatePage from './AvailableDays/AvailableDayCreatePage'
 import AvailableDayUpdatePage from './AvailableDays/AvailableDayUpdatePage'
 // Appointment
 import AppointmentListPage from './Appointment/AppointmentListPage'
+import AppointmentBookPage from './Appointment/AppointmentBookPage'
 import AppointmentCreatePage from './Appointment/AppointmentCreatePage'
 import AppointmentUpdatePage from './Appointment/AppointmentUpdatePage'
+import AppointmentManagePage from './Appointment/AppointmentManagePage'
+import AppointmentDeletePage from './Appointment/AppointmentDeletePage'
+import AppointmentDetailsPage from './Appointment/AppointmentDetailsPage'
 // Patients
 import PatientListPage from './Patient/PatientListPage'
 import PatientCreatePage from './Patient/PatientCreatePage'
@@ -33,8 +37,12 @@ const App: React.FC=() => {
           <Route path="/availabledays/edit/:availableDayId" element={<AvailableDayUpdatePage />} />
                     {/* Appointment pages */}
           <Route path="/appointment" element={<AppointmentListPage />} />
-          <Route path="/appointmentcreate" element={<AppointmentCreatePage />} />
-          <Route path="/appointmentupdate/:AppointmentId" element={<AppointmentUpdatePage />} />
+          <Route path="/appointment/book/:availableDayId" element={<AppointmentBookPage />} />
+          <Route path="/appointment/create" element={<AppointmentCreatePage />} />
+          <Route path="/appointment/update/:appointmentId" element={<AppointmentUpdatePage />} />
+          <Route path="/appointment/manage" element={<AppointmentManagePage />} />
+          <Route path="/appointment/delete/:appointmentId" element={<AppointmentDeletePage />} />
+          <Route path="/appointment/details/:appointmentId" element={<AppointmentDetailsPage />} />
                     {/* Patient pages */}
           <Route path="/patients" element={<PatientListPage />} />
           <Route path="/patientcreate" element={<PatientCreatePage />} />

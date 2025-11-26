@@ -1,60 +1,76 @@
-import type { Appointment } from '../types/Appointment';
+// src/components/AppointmentService.tsx
+
+import type { Appointment, AppointmentInput } from "../types/Appointment";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+// Add Authorization headers if token exists
+const getAuthHeaders = (): HeadersInit => {
+  const token = localStorage.getItem("token");
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
 };
 
+// Unified response handler
 const handleResponse = async (response: Response) => {
   if (response.ok) {
-    if (response.status === 204) return null;
+    if (response.status === 204) return null; // No content
     return response.json();
   } else {
-    const text = await response.text();
-    throw new Error(text || 'Network response was not ok');
+    const errorText = await response.text();
+    throw new Error(errorText || "Network response was not ok");
   }
 };
 
-// GET all
+// ----------- GET ALL -----------
 export const fetchAppointments = async (): Promise<Appointment[]> => {
-  const response = await fetch(`${API_URL}/api/appointments`);
+  const response = await fetch(`${API_URL}/api/Appointments`, { headers: getAuthHeaders() });
   return handleResponse(response);
 };
 
-// GET by ID
-export const fetchAppointmentById = async (id: number): Promise<Appointment> => {
-  const response = await fetch(`${API_URL}/api/appointments/${id}`);
+// ----------- GET BY ID -----------
+export const fetchAppointmentById = async (appointmentId: number): Promise<Appointment> => {
+  const response = await fetch(`${API_URL}/api/Appointments/${appointmentId}`, { headers: getAuthHeaders() });
   return handleResponse(response);
 };
 
-// POST
-export const createAppointment = async (appointment: Appointment): Promise<Appointment> => {
-  const response = await fetch(`${API_URL}/api/appointments`, {
-    method: 'POST',
+// ----------- GET BY PATIENT -----------
+export const fetchAppointmentsByPatient = async (patientId: number): Promise<Appointment[]> => {
+  const response = await fetch(`${API_URL}/api/Appointments/by-patient/${patientId}`, { headers: getAuthHeaders() });
+  return handleResponse(response);
+};
+
+// ----------- GET BY PERSONNEL -----------
+export const fetchAppointmentsByPersonnel = async (personnelId: number): Promise<Appointment[]> => {
+  const response = await fetch(`${API_URL}/api/Appointments/by-personnel/${personnelId}`, { headers: getAuthHeaders() });
+  return handleResponse(response);
+};
+
+// ----------- CREATE -----------
+export const createAppointment = async (input: AppointmentInput): Promise<Appointment> => {
+  const response = await fetch(`${API_URL}/api/Appointments`, {
+    method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify(appointment),
+    body: JSON.stringify(input),
   });
   return handleResponse(response);
 };
 
-// PUT
-export const updateAppointment = async (id: number, appointment: Appointment): Promise<Appointment | null> => {
-  const response = await fetch(`${API_URL}/api/appointments/${id}`, {
-    method: 'PUT',
+// ----------- UPDATE -----------
+export const updateAppointment = async (appointmentId: number, input: AppointmentInput): Promise<Appointment | null> => {
+  const response = await fetch(`${API_URL}/api/Appointments/${appointmentId}`, {
+    method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify(appointment),
+    body: JSON.stringify(input),
   });
   return handleResponse(response);
 };
 
-// DELETE
-export const deleteAppointment = async (id: number) => {
-  const response = await fetch(`${API_URL}/api/appointments/${id}`, {
-    method: 'DELETE',
+// ----------- DELETE -----------
+export const deleteAppointment = async (appointmentId: number): Promise<void> => {
+  const response = await fetch(`${API_URL}/api/Appointments/${appointmentId}`, {
+    method: "DELETE",
     headers: getAuthHeaders(),
   });
   return handleResponse(response);
