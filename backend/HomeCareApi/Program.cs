@@ -194,6 +194,18 @@ namespace HomeCareApi
                     Console.WriteLine("?? Database seeded.");
                 }
             }
+            // ===============================
+            // Seed Roles and Users
+            // ===============================
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                DbSeedAuth.SeedRoles(roleManager).Wait();
+
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
+                DbSeedAuth.SeedUsers(userManager).Wait();
+            }
+
 
             app.Run();
         }
