@@ -77,7 +77,13 @@ const PatientForm: React.FC<PatientFormProps> = ({
       <Button variant="primary" type="submit">
         {isUpdate ? 'Update Patient' : 'Create Patient'}
       </Button>
-      <Button variant="secondary" onClick={onCancel} className="ms-2">
+
+      <Button
+        variant="secondary"
+        type="button"   // prevents accidental submit
+        onClick={onCancel}
+        className="ms-2"
+      >
         Cancel
       </Button>
     </Form>

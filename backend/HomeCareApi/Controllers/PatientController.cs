@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HomeCareApi.Controllers
 {
@@ -74,6 +75,7 @@ namespace HomeCareApi.Controllers
         }
 
         // DELETE: api/patient/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {

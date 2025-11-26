@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import PersonnelTable from "./PersonnelTable";
 import type { Personnel } from "../types/Personnel";
 import * as PersonnelService from "./PersonnelService";
+import { useAuth } from "../Auth/AuthContext";
 
 const PersonnelListPage: React.FC = () => {
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
   const [personnels, setPersonnels] = useState<Personnel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,23 +23,23 @@ const PersonnelListPage: React.FC = () => {
       const data = await PersonnelService.fetchPersonnels();
       setPersonnels(data);
       console.log(data);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
         console.error(
-          `There was a problem with the fetch operation: ${error.message}`
+          `There was a problem with the fetch operation: ${err.message}`
         );
+        setError(err.message);
       } else {
-        console.error("Unknown error", error);
+        console.error("Unknown error", err);
+        setError("Failed to fetch personnel.");
       }
-      setError("Failed to fetch personnel.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPersonnels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    void fetchPersonnels();
   }, []);
 
   const filteredPersonnels = personnels.filter((p) =>
@@ -51,9 +56,10 @@ const PersonnelListPage: React.FC = () => {
       await PersonnelService.deletePersonnel(personnelId);
       setPersonnels((prev) => prev.filter((p) => p.id !== personnelId));
       console.log("Personnel deleted:", personnelId);
-    } catch (error) {
-      console.error("Error deleting personnel:", error);
-      setError("Failed to delete personnel.");
+    } catch (err) {
+      console.error("Error deleting personnel:", err);
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to delete personnel.");
     }
   };
 
@@ -85,9 +91,14 @@ const PersonnelListPage: React.FC = () => {
         onPersonnelDeleted={handlePersonnelDeleted}
       />
 
-      <Button href="/personnelcreate" className="btn btn-secondary mt-3">
-        Add New Personnel
-      </Button>
+      {isLoggedIn && (
+        <Button
+          className="btn btn-primary mb-3 me-2"
+          onClick={() => navigate("/personnelcreate")}
+        >
+          Add New Personnel
+        </Button>
+      )}
     </div>
   );
 };

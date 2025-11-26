@@ -27,9 +27,7 @@ const PersonnelForm: React.FC<PersonnelFormProps> = ({
     event.preventDefault();
 
     const personnel: Personnel = {
-      // ved update: bruker vi personnelId eller initialData.id
-      // ved create: faller vi tilbake til 0 (EF/DB genererer ekte Id)
-      id: personnelId ?? initialData?.id ?? 0,
+      id: personnelId ?? initialData?.id ?? 0, 
       name,
     };
 
@@ -55,7 +53,13 @@ const PersonnelForm: React.FC<PersonnelFormProps> = ({
       <Button variant="primary" type="submit">
         {isUpdate ? "Update Personnel" : "Create Personnel"}
       </Button>
-      <Button variant="secondary" onClick={onCancel} className="ms-2">
+
+      <Button
+        variant="secondary"
+        type="button"        // prevents accidental submit 
+        onClick={onCancel}
+        className="ms-2"
+      >
         Cancel
       </Button>
     </Form>
