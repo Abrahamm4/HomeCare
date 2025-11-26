@@ -33,7 +33,6 @@ namespace HomeCareApi.Controllers
         };
 
         // GET: api/patient
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PatientDto>>> GetAll()
         {

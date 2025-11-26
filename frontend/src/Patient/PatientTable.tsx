@@ -56,19 +56,17 @@ const PatientTable: React.FC<PatientTableProps> = ({
                 <td className="text-center">
                   {/* Update */}
                   <Button
-                    variant="link"
-                    className="p-0 me-3"
+                    className="btn btn-primary me-2"
                     onClick={() =>
                       navigate(`/patientupdate/${patient.patientId}`)
                     }
                   >
-                    Update
+                    Edit
                   </Button>
 
                   {/* Delete */}
                   <Button
-                    variant="link"
-                    className="p-0 text-danger"
+                    variant="danger"
                     onClick={() =>
                       patient.patientId &&
                       onPatientDeleted &&

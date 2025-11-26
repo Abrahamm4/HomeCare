@@ -99,8 +99,7 @@ const PatientListPage: React.FC = () => {
 
       {isLoggedIn && (
         <Button
-          variant="secondary"
-          className="mt-3"
+          className="btn btn-primary mb-3 me-2"
           onClick={() => navigate("/patientcreate")}
         >
           Add New Patient
