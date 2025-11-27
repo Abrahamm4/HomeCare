@@ -84,14 +84,13 @@ const AvailableDayDetailsPage: React.FC = () => {
               Edit
             </Link>
 
-            {/* If you ever make a delete page, re-enable this.
-                For now delete should be triggered from the list table */}
-            {/* <Link
+
+            { <Link
               to={`/availabledays/delete/${day.id}`}
               className="btn btn-danger btn-sm"
             >
               Delete
-            </Link> */}
+            </Link> }
 
             <Button variant="secondary" size="sm" onClick={() => navigate(-1)}>
               Back

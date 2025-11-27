@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { Alert, Button } from "react-bootstrap";
 import type { Appointment } from "../types/Appointment";
 import * as AppointmentService from "./AppointmentService";
 import * as PatientService from "../Patient/PatientService";
@@ -11,77 +12,112 @@ const AppointmentDetailsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
+      setError(null);
+
       try {
-        if (!appointmentId) throw new Error("No appointment ID provided");
+        if (!appointmentId) {
+          setError("No appointment ID provided");
+          setLoading(false);
+          return;
+        }
 
-        // Fetch appointment
-        const appt = await AppointmentService.fetchAppointmentById(Number(appointmentId));
+        const appt = await AppointmentService.fetchAppointmentById(
+          Number(appointmentId)
+        );
 
-        // Fetch related data
-        const [patients, personnelList, availableDays] = await Promise.all([
+        const [patients, personnels, days] = await Promise.all([
           PatientService.fetchPatients(),
           PersonnelService.fetchPersonnels(),
           AvailableDayService.fetchAvailableDays(),
         ]);
 
-        // Attach patient and personnel objects
         const patient = patients.find((p) => p.patientId === appt.patientId);
-        const day = availableDays.find((d) => d.id === appt.availableDayId);
-        const personnel = day ? personnelList.find((p) => p.id === day.personnelId) : undefined;
+        const day = days.find((d) => d.id === appt.availableDayId);
+        if (!day) throw new Error("Related available day not found");
+
+        const personnel = personnels.find((p) => p.id === day.personnelId);
 
         setAppointment({
           ...appt,
           patient,
-          availableDay: day ? { ...day, personnel } : undefined,
+          availableDay: { ...day, personnel },
         });
       } catch (err) {
-        console.error(err);
-        setError("Failed to load appointment details");
+        console.error("Failed to load appointment:", err);
+
+        if (err instanceof Error) setError(err.message);
+        else setError("Failed to load appointment details");
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
+    void loadData();
   }, [appointmentId]);
 
-  if (loading) return <p>Loading…</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!appointment || !appointment.availableDay) return <p>No appointment found</p>;
-
-  const { availableDay } = appointment;
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Appointment Details</h1>
+    <div>
+      <h2>Appointment Details</h2>
 
-      <p>
-        <strong>Patient:</strong> {appointment.patient?.name || "Unknown"}
-      </p>
-      <p>
-        <strong>Personnel:</strong> {availableDay.personnel?.name || "Unknown"}
-      </p>
-      <p>
-        <strong>Date:</strong> {new Date(availableDay.date).toLocaleDateString()}
-      </p>
-      <p>
-        <strong>Time:</strong> {`${availableDay.startTime} - ${availableDay.endTime}`}
-      </p>
-      <p>
-        <strong>Notes:</strong> {appointment.notes || "-"}
-      </p>
+      {error && <Alert variant="danger">{error}</Alert>}
 
-      <button
-        className="mt-4 px-4 py-2 border rounded"
-        onClick={() => navigate(-1)}
-      >
-        Back
-      </button>
+      {!appointment || !appointment.availableDay ? (
+        <p>No appointment found</p>
+      ) : (
+        <>
+          <p>
+            <strong>Patient:</strong> {appointment.patient?.name || "Unknown"}
+          </p>
+
+          <p>
+            <strong>Personnel:</strong>{" "}
+            {appointment.availableDay.personnel?.name || "Unknown"}
+          </p>
+
+          <p>
+            <strong>Date:</strong> {appointment.availableDay.date.split("T")[0]}
+          </p>
+
+          <p>
+            <strong>Start Time:</strong> {appointment.availableDay.startTime}
+          </p>
+
+          <p>
+            <strong>End Time:</strong> {appointment.availableDay.endTime}
+          </p>
+
+          <p>
+            <strong>Notes:</strong> {appointment.notes || "-"}
+          </p>
+
+          <div className="d-flex flex-wrap gap-2 mt-3">
+            <Link
+              to={`/appointment/update/${appointment.appointmentId}`}
+              className="btn btn-primary btn-sm"
+            >
+              Edit
+            </Link>
+
+            <Link
+              to={`/appointment/delete/${appointment.appointmentId}`}
+              className="btn btn-danger btn-sm"
+            >
+              Delete
+            </Link>
+
+            <Button variant="secondary" size="sm" onClick={() => navigate(-1)}>
+              Back
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

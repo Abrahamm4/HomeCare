@@ -71,7 +71,7 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
               {/* Actions visible only for logged-in users */}
               {isLoggedIn && (
                 <td className="text-center">
-                  {/* DETAILS always allowed */}
+                  {/* Details always allowed */}
                   <Link
                     to={`/availabledays/details/${d.id}`}
                     className="btn btn-info btn-sm me-2"
@@ -79,7 +79,7 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
                     Details
                   </Link>
 
-                  {/* EDIT allowed if logged in */}
+                  {/* Edit allowed if logged in */}
                   <Button
                     className="btn btn-primary btn-sm me-2"
                     onClick={() => window.location.assign(`/availabledays/edit/${d.id}`)}
@@ -87,7 +87,7 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
                     Edit
                   </Button>
 
-                  {/* DELETE disabled if booked */}
+                  {/* Delete disabled if booked */}
                   <Button
                     variant="danger"
                     size="sm"

@@ -10,6 +10,7 @@ import * as AppointmentService from "./AppointmentService";
 import * as AvailableDayService from "../AvailableDays/AvailableDayService";
 import * as PatientService from "../Patient/PatientService";
 import * as PersonnelService from "../Personnel/PersonnelService";
+import { useAuth } from "../Auth/AuthContext";
 
 interface MergedSlot {
   availableDay: AvailableDay;
@@ -17,18 +18,20 @@ interface MergedSlot {
 }
 
 const AppointmentListPage: React.FC = () => {
-  const [slots, setSlots] = useState<MergedSlot[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+
+  const [slots, setSlots] = useState<MergedSlot[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchSlots = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const [appointments, availableDays, patients, personnel]: [
+      const [appointments, availableDays, patients, personnels]: [
         Appointment[],
         AvailableDay[],
         Patient[],
@@ -41,84 +44,123 @@ const AppointmentListPage: React.FC = () => {
       ]);
 
       const merged: MergedSlot[] = availableDays.map((day) => {
-        const appointment = appointments.find((a) => a.availableDayId === day.id);
+        const appointment = appointments.find(
+          (a) => a.availableDayId === day.id
+        );
+
         const patient = appointment
           ? patients.find((p) => p.patientId === appointment.patientId)
           : undefined;
-        const person = personnel.find((p) => p.id === day.personnelId);
+
+        const personnel = personnels.find((p) => p.id === day.personnelId);
 
         return {
-          availableDay: { ...day, personnel: person },
-          appointment: appointment ? { ...appointment, patient } : undefined,
+          availableDay: { ...day, personnel },
+          appointment: appointment
+            ? { ...appointment, patient, personnel }
+            : undefined,
         };
       });
 
       setSlots(merged);
     } catch (err) {
-      console.error(err);
-      setError("Failed to fetch appointments or slots");
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to fetch appointments or available slots.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSlots();
+    void fetchSlots();
   }, []);
 
   const handleBook = (availableDayId: number) => {
     navigate(`/appointment/book/${availableDayId}`);
   };
 
-  const handleManage = () => {
-    navigate("/appointment/manage");
+  const handleDelete = async (appointmentId: number) => {
+    if (!window.confirm("Delete this appointment?")) return;
+
+    try {
+      await AppointmentService.deleteAppointment(appointmentId);
+      fetchSlots();
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to delete appointment.");
+    }
   };
 
-  const filteredSlots = slots.filter((slot) =>
-    slot.availableDay.date.includes(search)
-  );
+  // Filter based on date, patient name and personnel name
+  const filtered = slots.filter((slot) => {
+    const q = searchQuery.toLowerCase();
 
-  // Explicitly mark booked slots
-  const tableData: Appointment[] = filteredSlots.map((slot) => ({
+    const dateMatch = slot.availableDay.date.toLowerCase().includes(q);
+    const personnelMatch = slot.availableDay.personnel?.name
+      ?.toLowerCase()
+      .includes(q);
+    const patientMatch = slot.appointment?.patient?.name
+      ?.toLowerCase()
+      .includes(q);
+
+    return dateMatch || personnelMatch || patientMatch;
+  });
+
+  const tableData: Appointment[] = filtered.map((slot) => ({
     appointmentId: slot.appointment?.appointmentId ?? 0,
     patientId: slot.appointment?.patientId ?? 0,
     personnelId: slot.availableDay.personnelId,
     availableDayId: slot.availableDay.id,
     date: slot.availableDay.date,
     notes: slot.appointment?.notes,
+
     patient: slot.appointment?.patient,
     personnel: slot.availableDay.personnel,
+
     availableDay: {
       ...slot.availableDay,
-      isBooked: !!slot.appointment, // mark booked slots
+      isBooked: !!slot.appointment,
     },
   }));
 
-  if (loading) return <p>Loading...</p>;
-
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Appointments & Available Slots</h1>
+    <div>
+      <h1>Appointments & Available Slots</h1>
 
-      <div className="mb-3">
-        <Button className="me-2" variant="warning" onClick={handleManage}>
-          Manage Appointments
-        </Button>
-        <Button onClick={fetchSlots} disabled={loading}>
-          {loading ? "Loading..." : "Refresh"}
-        </Button>
-      </div>
+      <Button
+        onClick={fetchSlots}
+        className="btn btn-primary mb-3 me-2"
+        disabled={loading}
+      >
+        {loading ? "Loading..." : "Refresh Appointments"}
+      </Button>
 
-      <Form.Control
-        className="mb-3"
-        placeholder="Search by date"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+      <Form.Group className="mb-3">
+        <Form.Control
+          type="text"
+          placeholder="Search by date, personnel, or patient"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </Form.Group>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <AppointmentTable
+        appointments={tableData}
+        onBook={handleBook}
+        onDelete={handleDelete}
       />
 
-      {error && <p className="text-red-600">{error}</p>}
-
-      <AppointmentTable appointments={tableData} onBook={handleBook} />
+      {isLoggedIn && (
+      <Button
+        variant="warning"
+        className="mb-3 me-2"
+        onClick={() => navigate("/appointment/manage")}
+      >
+        Manage Appointments
+      </Button>
+      )}
     </div>
   );
 };

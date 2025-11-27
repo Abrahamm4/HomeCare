@@ -85,7 +85,7 @@ const App: React.FC = () => {
             <Route path="/appointment" element={<AppointmentListPage />} />
 
             <Route
-              path="/appointmentupdate/:appointmentId"
+              path="/appointment/update/:appointmentId"
               element={
                 <ProtectedRoute>
                   <AppointmentUpdatePage />
@@ -104,12 +104,16 @@ const App: React.FC = () => {
             />
 
             <Route
-              path="/appointmentdelete/:appointmentId"
-              element={<AppointmentDeletePage />}
+              path="/appointment/delete/:appointmentId"
+              element={
+                <ProtectedRoute>
+                  <AppointmentDeletePage />
+                </ProtectedRoute>
+              }
             />
 
             <Route
-              path="/appointmentdetails/:appointmentId"
+              path="/appointment/details/:appointmentId"
               element={<AppointmentDetailsPage />}
             />
 

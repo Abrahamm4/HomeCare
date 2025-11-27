@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import AppointmentTable from "./AppointmentTable";
 import type { Appointment } from "../types/Appointment";
@@ -18,8 +18,9 @@ interface MergedSlot {
 
 const AppointmentManagePage: React.FC = () => {
   const [slots, setSlots] = useState<MergedSlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   const fetchBookedAppointments = async () => {
@@ -39,16 +40,23 @@ const AppointmentManagePage: React.FC = () => {
         PersonnelService.fetchPersonnels(),
       ]);
 
-      const bookedSlots: MergedSlot[] = appointments.map(a => {
-        const day = availableDays.find(d => d.id === a.availableDayId)!;
-        const patient = patients.find(p => p.patientId === a.patientId);
-        const person = personnel.find(p => p.id === day.personnelId);
+      const bookedSlots: MergedSlot[] = appointments.reduce(
+        (acc, appt) => {
+          const day = availableDays.find((d) => d.id === appt.availableDayId);
+          if (!day) return acc;
 
-        return {
-          availableDay: { ...day, personnel: person },
-          appointment: { ...a, patient, personnel: person },
-        };
-      });
+          const patient = patients.find((p) => p.patientId === appt.patientId);
+          const person = personnel.find((p) => p.id === day.personnelId);
+
+          acc.push({
+            availableDay: { ...day, personnel: person },
+            appointment: { ...appt, patient, personnel: person },
+          });
+
+          return acc;
+        },
+        [] as MergedSlot[]
+      );
 
       setSlots(bookedSlots);
     } catch (err) {
@@ -60,7 +68,7 @@ const AppointmentManagePage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchBookedAppointments();
+    void fetchBookedAppointments();
   }, []);
 
   const handleEdit = (appointmentId: number) => {
@@ -79,7 +87,7 @@ const AppointmentManagePage: React.FC = () => {
     navigate("/appointment");
   };
 
-  if (loading) return <p>Loading…</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="p-4">
@@ -89,10 +97,10 @@ const AppointmentManagePage: React.FC = () => {
         Back to All Slots
       </Button>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error && <Alert variant="danger">{error}</Alert>}
 
       <AppointmentTable
-        appointments={slots.map(slot => ({
+        appointments={slots.map((slot) => ({
           ...slot.appointment,
           availableDay: slot.availableDay,
         }))}

@@ -1,12 +1,9 @@
-// src/types/Appointment.ts
-
 import type { AvailableDay } from "./AvailableDay";
 import type { Patient } from "./Patient";
 import type { Personnel } from "./Personnel";
 
-/**
- * Main Appointment type
- */
+ // Main Appointment type
+ 
 export interface Appointment {
   appointmentId: number;           // consistent with backend
   patientId: number;
@@ -21,9 +18,7 @@ export interface Appointment {
   availableDay?: AvailableDay;
 }
 
-/**
- * Input for creating/updating an appointment
- */
+// Input for creating/updating an appointment
 export interface AppointmentInput {
   patientId: number;
   availableDayId: number;

@@ -1,11 +1,10 @@
 import type { AvailableDay, AvailableDayInput } from "../types/AvailableDay";
-import type { Personnel } from "../types/Personnel";
 import * as PersonnelService from "../Personnel/PersonnelService";
 import { getStoredToken } from "../Auth/AuthService";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// --- AUTH HEADERS (identisk med PatientService)
+// Auth headers
 const getAuthHeaders = (): HeadersInit => {
   const token = getStoredToken();
   const headers: HeadersInit = {
@@ -19,7 +18,7 @@ const getAuthHeaders = (): HeadersInit => {
   return headers;
 };
 
-// --- HANDLE RESPONSE (identisk med PatientService)
+// Handle response
 const handleResponse = async (response: Response) => {
   if (response.ok) {
     if (response.status === 204) return null;
@@ -35,7 +34,7 @@ const handleResponse = async (response: Response) => {
   }
 };
 
-// ---- Helper to attach personnel info ----
+// Helpers
 const enrichWithPersonnel = async (
   days: AvailableDay[]
 ): Promise<AvailableDay[]> => {
@@ -46,7 +45,7 @@ const enrichWithPersonnel = async (
   });
 };
 
-// ----------- GET ALL -----------
+// Get all
 export const fetchAvailableDays = async (): Promise<AvailableDay[]> => {
   const response = await fetch(`${API_URL}/api/AvailableDays`, {
     headers: getAuthHeaders(),
@@ -55,7 +54,7 @@ export const fetchAvailableDays = async (): Promise<AvailableDay[]> => {
   return enrichWithPersonnel(days);
 };
 
-// ----------- GET BY ID -----------
+// Get by ID
 export const fetchAvailableDayById = async (
   availableDayId: number
 ): Promise<AvailableDay> => {
@@ -70,7 +69,7 @@ export const fetchAvailableDayById = async (
   return { ...day, personnel };
 };
 
-// ----------- GET BY DATE -----------
+// Get by date
 export const fetchAvailableDaysByDate = async (
   date: string
 ): Promise<AvailableDay[]> => {
@@ -82,7 +81,7 @@ export const fetchAvailableDaysByDate = async (
   return enrichWithPersonnel(days);
 };
 
-// ----------- GET BY PERSONNEL -----------
+// Get by personnel
 export const fetchAvailableDaysByPersonnel = async (
   personnelId: number
 ): Promise<AvailableDay[]> => {
@@ -94,7 +93,7 @@ export const fetchAvailableDaysByPersonnel = async (
   return enrichWithPersonnel(days);
 };
 
-// ----------- CREATE -----------
+// Create
 export const createAvailableDay = async (
   availableDay: AvailableDayInput
 ): Promise<AvailableDay> => {
@@ -112,7 +111,7 @@ export const createAvailableDay = async (
   return { ...day, personnel };
 };
 
-// ----------- UPDATE -----------
+// Update
 export const updateAvailableDay = async (
   availableDayId: number,
   availableDay: AvailableDayInput
@@ -135,7 +134,7 @@ export const updateAvailableDay = async (
   return { ...day, personnel };
 };
 
-// ----------- DELETE -----------
+// Delete
 export const deleteAvailableDay = async (
   availableDayId: number
 ): Promise<void> => {

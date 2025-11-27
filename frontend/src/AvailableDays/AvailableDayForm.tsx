@@ -109,7 +109,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
 
       <Button
         variant="secondary"
-        type="button" // prevents accidental submit (same as PatientForm)
+        type="button" // prevents accidental submit
         onClick={onCancel}
         className="ms-2"
       >

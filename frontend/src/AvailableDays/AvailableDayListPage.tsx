@@ -71,15 +71,6 @@ const AvailableDayListPage: React.FC = () => {
         {loading ? "Loading..." : "Refresh Available Days"}
       </Button>
 
-      {isLoggedIn && (
-        <Button
-          className="btn btn-primary mb-3 me-2"
-          onClick={() => navigate("/availabledays/create")}
-        >
-          Add New Available Day
-        </Button>
-      )}
-
       <Form.Group className="mb-3">
         <Form.Control
           type="text"
@@ -120,6 +111,15 @@ const AvailableDayListPage: React.FC = () => {
         showPersonnel={showPersonnel}
         showTimes={showTimes}
       />
+
+      {isLoggedIn && (
+      <Button
+        className="btn btn-primary mb-3 me-2"
+        onClick={() => navigate("/availabledays/create")}
+      >
+        Add New Available Day
+      </Button>
+      )}
     </div>
   );
 };
