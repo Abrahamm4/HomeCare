@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AvailableDaysForm from './AvailableDayForm';
 import type { AvailableDay, AvailableDayInput } from '../types/AvailableDay';
+import type { Personnel } from '../types/Personnel';
 import * as AvailableDayService from './AvailableDayService';
+import * as PersonnelService from '../Personnel/PersonnelService';
 
 const AvailableDayUpdatePage: React.FC = () => {
   const { availableDayId } = useParams<{ availableDayId: string }>();
   const navigate = useNavigate();
 
   const [day, setDay] = useState<AvailableDay | null>(null);
+  const [personnels, setPersonnels] = useState<Personnel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const load = async () => {
+    const loadData = async () => {
       try {
         if (!availableDayId) {
           setError("No ID provided");
@@ -21,24 +24,28 @@ const AvailableDayUpdatePage: React.FC = () => {
           return;
         }
 
-        const data = await AvailableDayService.fetchAvailableDayById(Number(availableDayId));
-        setDay(data);
+        const [dayData, personnelList] = await Promise.all([
+          AvailableDayService.fetchAvailableDayById(Number(availableDayId)),
+          PersonnelService.fetchPersonnels(),
+        ]);
+
+        setDay(dayData);
+        setPersonnels(personnelList);
       } catch (err) {
         console.error(err);
-        setError("Failed to load AvailableDay");
+        setError("Failed to load data");
       } finally {
         setLoading(false);
       }
     };
 
-    load();
+    loadData();
   }, [availableDayId]);
 
   const handleAvailableDayUpdated = async (dayInput: AvailableDayInput) => {
     try {
       if (!availableDayId) return;
-      const updated = await AvailableDayService.updateAvailableDay(Number(availableDayId), dayInput);
-      console.log("Updated successfully:", updated);
+      await AvailableDayService.updateAvailableDay(Number(availableDayId), dayInput);
       navigate('/availabledays');
     } catch (err) {
       console.error("Update failed:", err);
@@ -46,7 +53,7 @@ const AvailableDayUpdatePage: React.FC = () => {
   };
 
   if (loading) return <p>Loading…</p>;
-  if (error) return <p>{error}</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!day) return <p>No AvailableDay found</p>;
 
   return (
@@ -56,6 +63,7 @@ const AvailableDayUpdatePage: React.FC = () => {
         isUpdate={true}
         initialData={day}
         onAvailableDayChanged={handleAvailableDayUpdated}
+        personnels={personnels}
       />
     </div>
   );

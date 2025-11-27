@@ -7,6 +7,8 @@ import HomePage from './Home/HomePage'
 import AvailableDaysListPage from './AvailableDays/AvailableDayListPage'
 import AvailableDayCreatePage from './AvailableDays/AvailableDayCreatePage'
 import AvailableDayUpdatePage from './AvailableDays/AvailableDayUpdatePage'
+import AvailableDayDeletePage from './AvailableDays/AvailableDayDeletePage'
+import AvailableDayDetailsPage from './AvailableDays/AvailableDayDetailsPage'
 // Appointment
 import AppointmentListPage from './Appointment/AppointmentListPage'
 import AppointmentBookPage from './Appointment/AppointmentBookPage'
@@ -34,6 +36,8 @@ const App: React.FC=() => {
           <Route path="/availabledays" element={<AvailableDaysListPage />} />
           <Route path="/availabledayscreate" element={<AvailableDayCreatePage />} />
           <Route path="/availabledays/edit/:availableDayId" element={<AvailableDayUpdatePage />} />
+          <Route path="/availabledays/delete/:availableDayId" element={<AvailableDayDeletePage />} />
+          <Route path="/availabledays/details/:availableDayId" element={<AvailableDayDetailsPage />} />
                     {/* Appointment pages */}
           <Route path="/appointment" element={<AppointmentListPage />} />
           <Route path="/appointment/book/:availableDayId" element={<AppointmentBookPage />} />

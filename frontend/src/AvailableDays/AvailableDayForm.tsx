@@ -1,41 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import type { AvailableDay, AvailableDayInput } from "../types/AvailableDay";
+import type { Personnel } from "../types/Personnel";
 
 interface AvailableDaysFormProps {
   onAvailableDayChanged: (newDay: AvailableDayInput) => void;
   isUpdate?: boolean;
   initialData?: AvailableDay;
+  personnels?: Personnel[];
 }
 
 const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
   onAvailableDayChanged,
   isUpdate = false,
   initialData,
+  personnels = [],
 }) => {
-  const [personnelId, setPersonnelId] = useState<string>(
-    initialData?.personnelId.toString() || ""
-  );
-  const [date, setDate] = useState<string>(
-    initialData?.date ? initialData.date.split("T")[0] : ""
-  );
-  const [startTime, setStartTime] = useState<string>(initialData?.startTime || "");
-  const [endTime, setEndTime] = useState<string>(initialData?.endTime || "");
   const navigate = useNavigate();
+
+  const [personnelId, setPersonnelId] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
+
+  useEffect(() => {
+    setPersonnelId(
+      initialData?.personnelId.toString() || personnels[0]?.id.toString() || ""
+    );
+    setDate(initialData?.date ? initialData.date.split("T")[0] : "");
+    setStartTime(initialData?.startTime || "");
+    setEndTime(initialData?.endTime || "");
+  }, [initialData, personnels]);
 
   const onCancel = () => navigate(-1);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-  const availableDayInput: AvailableDayInput & { id?: number } = {
-    ... (isUpdate && { id: initialData?.id }),
-    personnelId: Number(personnelId),
-    date,
-    startTime,
-    endTime,
-  };
+    const availableDayInput: AvailableDayInput & { id?: number } = {
+      ...(isUpdate && { id: initialData?.id }),
+      personnelId: Number(personnelId),
+      date,
+      startTime,
+      endTime,
+    };
 
     onAvailableDayChanged(availableDayInput);
   };
@@ -43,14 +52,17 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Group controlId="formPersonnelId" className="mb-3">
-        <Form.Label>Personnel ID</Form.Label>
-        <Form.Control
-          type="number"
-          placeholder="Enter Personnel ID"
+        <Form.Label>Personnel</Form.Label>
+        <Form.Select
           value={personnelId}
-          onChange={(e) => setPersonnelId(e.target.value)}
+          onChange={e => setPersonnelId(e.target.value)}
           required
-        />
+        >
+          <option value="" disabled>Select Personnel</option>
+          {personnels.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </Form.Select>
       </Form.Group>
 
       <Form.Group controlId="formDate" className="mb-3">
@@ -58,7 +70,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
         <Form.Control
           type="date"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={e => setDate(e.target.value)}
           required
         />
       </Form.Group>
@@ -68,7 +80,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
         <Form.Control
           type="time"
           value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
+          onChange={e => setStartTime(e.target.value)}
           required
         />
       </Form.Group>
@@ -78,7 +90,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
         <Form.Control
           type="time"
           value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
+          onChange={e => setEndTime(e.target.value)}
           required
         />
       </Form.Group>
