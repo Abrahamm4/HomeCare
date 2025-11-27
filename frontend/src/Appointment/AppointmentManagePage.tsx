@@ -1,5 +1,3 @@
-// src/components/AppointmentManagePage.tsx
-
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -24,10 +22,10 @@ const AppointmentManagePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Fetch booked appointments only
   const fetchBookedAppointments = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const [appointments, availableDays, patients, personnel]: [
         Appointment[],
@@ -41,15 +39,14 @@ const AppointmentManagePage: React.FC = () => {
         PersonnelService.fetchPersonnels(),
       ]);
 
-      // Only booked appointments
-      const bookedSlots: MergedSlot[] = appointments.map((a) => {
-        const day = availableDays.find((d) => d.id === a.availableDayId)!;
-        const patient = patients.find((p) => p.patientId === a.patientId);
-        const person = personnel.find((p) => p.id === day.personnelId);
+      const bookedSlots: MergedSlot[] = appointments.map(a => {
+        const day = availableDays.find(d => d.id === a.availableDayId)!;
+        const patient = patients.find(p => p.patientId === a.patientId);
+        const person = personnel.find(p => p.id === day.personnelId);
 
         return {
           availableDay: { ...day, personnel: person },
-          appointment: { ...a, patient },
+          appointment: { ...a, patient, personnel: person },
         };
       });
 
@@ -82,21 +79,22 @@ const AppointmentManagePage: React.FC = () => {
     navigate("/appointment");
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Loading…</p>;
 
   return (
-    <div>
-      <h1>Manage Booked Appointments</h1>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Manage Booked Appointments</h1>
+
       <Button className="mb-3" onClick={handleBack}>
         Back to All Slots
       </Button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {error && <p className="text-red-600">{error}</p>}
 
       <AppointmentTable
-        appointments={slots.map((slot) => ({
+        appointments={slots.map(slot => ({
           ...slot.appointment,
           availableDay: slot.availableDay,
-          personnel: slot.availableDay.personnel,
         }))}
         isManage={true}
         onEdit={handleEdit}

@@ -28,4 +28,6 @@ export interface AppointmentInput {
   patientId: number;
   availableDayId: number;
   notes?: string;
+  personnelId?: number;
+  date?: string;
 }

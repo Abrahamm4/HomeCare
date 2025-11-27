@@ -26,6 +26,7 @@ const AppointmentListPage: React.FC = () => {
   const fetchSlots = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const [appointments, availableDays, patients, personnel]: [
         Appointment[],
@@ -39,7 +40,6 @@ const AppointmentListPage: React.FC = () => {
         PersonnelService.fetchPersonnels(),
       ]);
 
-      // Merge availableDays with appointments and attach patient/personnel info
       const merged: MergedSlot[] = availableDays.map((day) => {
         const appointment = appointments.find((a) => a.availableDayId === day.id);
         const patient = appointment
@@ -48,7 +48,7 @@ const AppointmentListPage: React.FC = () => {
         const person = personnel.find((p) => p.id === day.personnelId);
 
         return {
-          availableDay: { ...day, personnel: person }, // Attach personnel object
+          availableDay: { ...day, personnel: person },
           appointment: appointment ? { ...appointment, patient } : undefined,
         };
       });
@@ -78,6 +78,7 @@ const AppointmentListPage: React.FC = () => {
     slot.availableDay.date.includes(search)
   );
 
+  // Explicitly mark booked slots
   const tableData: Appointment[] = filteredSlots.map((slot) => ({
     appointmentId: slot.appointment?.appointmentId ?? 0,
     patientId: slot.appointment?.patientId ?? 0,
@@ -85,21 +86,21 @@ const AppointmentListPage: React.FC = () => {
     availableDayId: slot.availableDay.id,
     date: slot.availableDay.date,
     notes: slot.appointment?.notes,
-    patient: slot.appointment?.patient, // populated if booked
-    personnel: slot.availableDay.personnel, // now correctly attached
-    availableDay: slot.availableDay,
+    patient: slot.appointment?.patient,
+    personnel: slot.availableDay.personnel,
+    availableDay: {
+      ...slot.availableDay,
+      isBooked: !!slot.appointment, // mark booked slots
+    },
   }));
 
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div>
-      <h1>Appointments & Available Slots</h1>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Appointments & Available Slots</h1>
 
       <div className="mb-3">
-        <Button className="me-2" onClick={() => navigate("/appointment/create")}>
-          Create Appointment
-        </Button>
         <Button className="me-2" variant="warning" onClick={handleManage}>
           Manage Appointments
         </Button>
@@ -115,7 +116,7 @@ const AppointmentListPage: React.FC = () => {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="text-red-600">{error}</p>}
 
       <AppointmentTable appointments={tableData} onBook={handleBook} />
     </div>

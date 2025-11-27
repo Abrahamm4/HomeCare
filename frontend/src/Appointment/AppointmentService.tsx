@@ -1,5 +1,3 @@
-// src/components/AppointmentService.tsx
-
 import type { Appointment, AppointmentInput } from "../types/Appointment";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -35,18 +33,6 @@ export const fetchAppointmentById = async (appointmentId: number): Promise<Appoi
   return handleResponse(response);
 };
 
-// ----------- GET BY PATIENT -----------
-export const fetchAppointmentsByPatient = async (patientId: number): Promise<Appointment[]> => {
-  const response = await fetch(`${API_URL}/api/Appointments/by-patient/${patientId}`, { headers: getAuthHeaders() });
-  return handleResponse(response);
-};
-
-// ----------- GET BY PERSONNEL -----------
-export const fetchAppointmentsByPersonnel = async (personnelId: number): Promise<Appointment[]> => {
-  const response = await fetch(`${API_URL}/api/Appointments/by-personnel/${personnelId}`, { headers: getAuthHeaders() });
-  return handleResponse(response);
-};
-
 // ----------- CREATE -----------
 export const createAppointment = async (input: AppointmentInput): Promise<Appointment> => {
   const response = await fetch(`${API_URL}/api/Appointments`, {
@@ -58,12 +44,30 @@ export const createAppointment = async (input: AppointmentInput): Promise<Appoin
 };
 
 // ----------- UPDATE -----------
-export const updateAppointment = async (appointmentId: number, input: AppointmentInput): Promise<Appointment | null> => {
+export const updateAppointment = async (
+  appointmentId: number,
+  input: AppointmentInput
+): Promise<Appointment | null> => {
+
+  if (!input.personnelId || !input.date) {
+    throw new Error("personnelId and date must be provided for update");
+  }
+
+  const payload = {
+    appointmentId,
+    date: input.date,
+    notes: input.notes ?? "",
+    patientId: input.patientId,
+    personnelId: input.personnelId,
+    availableDayId: input.availableDayId,
+  };
+
   const response = await fetch(`${API_URL}/api/Appointments/${appointmentId}`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify(input),
+    body: JSON.stringify(payload),
   });
+
   return handleResponse(response);
 };
 
