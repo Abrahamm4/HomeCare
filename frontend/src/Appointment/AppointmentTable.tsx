@@ -1,5 +1,3 @@
-// src/components/AppointmentTable.tsx
-
 import React, { useState } from "react";
 import { Table, Button } from "react-bootstrap";
 import type { Appointment } from "../types/Appointment";
