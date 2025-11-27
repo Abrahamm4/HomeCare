@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import PatientTable from "./PatientTable";
 import type { Patient } from "../types/Patient";
 import * as PatientService from "./PatientService";
+import { useAuth } from "../Auth/AuthContext";
 
 const PatientListPage: React.FC = () => {
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,23 +23,23 @@ const PatientListPage: React.FC = () => {
       const data = await PatientService.fetchPatients();
       setPatients(data);
       console.log(data);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
         console.error(
-          `There was a problem with the fetch operation: ${error.message}`
+          `There was a problem with the fetch operation: ${err.message}`
         );
+        setError(err.message);
       } else {
-        console.error("Unknown error", error);
+        console.error("Unknown error", err);
+        setError("Failed to fetch patients.");
       }
-      setError("Failed to fetch patients.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPatients();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    void fetchPatients();
   }, []);
 
   const filteredPatients = patients.filter((p) =>
@@ -57,9 +62,10 @@ const PatientListPage: React.FC = () => {
       await PatientService.deletePatient(patientId);
       setPatients((prev) => prev.filter((p) => p.patientId !== patientId));
       console.log("Patient deleted:", patientId);
-    } catch (error) {
-      console.error("Error deleting patient:", error);
-      setError("Failed to delete patient.");
+    } catch (err) {
+      console.error("Error deleting patient:", err);
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to delete patient.");
     }
   };
 
@@ -91,9 +97,14 @@ const PatientListPage: React.FC = () => {
         onPatientDeleted={handlePatientDeleted}
       />
 
-      <Button href="/patientcreate" className="btn btn-secondary mt-3">
-        Add New Patient
-      </Button>
+      {isLoggedIn && (
+        <Button
+          className="btn btn-primary mb-3 me-2"
+          onClick={() => navigate("/patientcreate")}
+        >
+          Add New Patient
+        </Button>
+      )}
     </div>
   );
 };

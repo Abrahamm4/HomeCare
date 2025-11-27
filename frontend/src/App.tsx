@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import Container from 'react-bootstrap/Container'
-import './App.css'
-import NavMenu from './shared/NavMenu'
-import HomePage from './Home/HomePage'
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Container from "react-bootstrap/Container";
+import "./App.css";
+import NavMenu from "./shared/NavMenu";
+import HomePage from "./Home/HomePage";
+
 // Available Days
 import AvailableDaysListPage from './AvailableDays/AvailableDayListPage'
 import AvailableDayCreatePage from './AvailableDays/AvailableDayCreatePage'
@@ -17,78 +18,152 @@ import AppointmentManagePage from './Appointment/AppointmentManagePage'
 import AppointmentDeletePage from './Appointment/AppointmentDeletePage'
 import AppointmentDetailsPage from './Appointment/AppointmentDetailsPage'
 // Patients
-import PatientListPage from './Patient/PatientListPage'
-import PatientCreatePage from './Patient/PatientCreatePage'
-import PatientUpdatePage from './Patient/PatientUpdatePage'
+import PatientListPage from "./Patient/PatientListPage";
+import PatientCreatePage from "./Patient/PatientCreatePage";
+import PatientUpdatePage from "./Patient/PatientUpdatePage";
+
 // Personnel
-import PersonnelListPage from './Personnel/PersonnelListPage'
-import PersonnelCreatePage from './Personnel/PersonnelCreatePage'
-import PersonnelUpdatePage from './Personnel/PersonnelUpdatePage'
+import PersonnelListPage from "./Personnel/PersonnelListPage";
+import PersonnelCreatePage from "./Personnel/PersonnelCreatePage";
+import PersonnelUpdatePage from "./Personnel/PersonnelUpdatePage";
 
-const App: React.FC=() => {
-  return(
-    <Router>
-    <NavMenu />
-    <Container className="mt-3">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-                    {/* Available Days pages */}
-          <Route path="/availabledays" element={<AvailableDaysListPage />} />
-          <Route path="/availabledayscreate" element={<AvailableDayCreatePage />} />
-          <Route path="/availabledays/edit/:availableDayId" element={<AvailableDayUpdatePage />} />
-          <Route path="/availabledays/delete/:availableDayId" element={<AvailableDayDeletePage />} />
-          <Route path="/availabledays/details/:availableDayId" element={<AvailableDayDetailsPage />} />
-                    {/* Appointment pages */}
-          <Route path="/appointment" element={<AppointmentListPage />} />
-          <Route path="/appointment/book/:availableDayId" element={<AppointmentBookPage />} />
-          <Route path="/appointment/update/:appointmentId" element={<AppointmentUpdatePage />} />
-          <Route path="/appointment/manage" element={<AppointmentManagePage />} />
-          <Route path="/appointment/delete/:appointmentId" element={<AppointmentDeletePage />} />
-          <Route path="/appointment/details/:appointmentId" element={<AppointmentDetailsPage />} />
-                    {/* Patient pages */}
-          <Route path="/patients" element={<PatientListPage />} />
-          <Route path="/patientcreate" element={<PatientCreatePage />} />
-          <Route path="/patientupdate/:patientId" element={<PatientUpdatePage />} />
-                    {/* Personnel pages */}   
-          <Route path="/personnels" element={<PersonnelListPage />} />
-          <Route path="/personnelcreate" element={<PersonnelCreatePage />} />
-          <Route path="/personnelupdate/:personnelId" element={<PersonnelUpdatePage />} />
-          
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-    </Container>
-</Router>
-  )
-}
-export default App
-/*function App() {
-  const [count, setCount] = useState(0)
+// Auth
+import { AuthProvider } from "./Auth/AuthContext";
+import ProtectedRoute from "./Auth/ProtectedRoute";
+import LoginPage from "./Auth/LoginPage";
+import RegisterPage from "./Auth/RegisterPage";
 
+const App: React.FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <AuthProvider>
+      <Router>
+        <NavMenu />
+        <Container className="mt-3">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
 
-export default App
-*/
+            {/* Auth */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Available Days pages */}
+            <Route
+              path="/availabledays"
+              element={
+                  <AvailableDaysListPage />
+              }
+            />
+            <Route
+              path="/availabledayscreate"
+              element={
+                <ProtectedRoute>
+                  <AvailableDayCreatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/availabledaysupdate/:availableDayId"
+              element={
+                <ProtectedRoute>
+                  <AvailableDayUpdatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/availabledaysdelete/:availableDayId"
+              element={<AvailableDayDeletePage/>}
+            />
+            <Route
+              path="/availabledaysdetails/:availableDayId"
+              element={<AvailableDayDetailsPage/>}
+            />
+
+            {/* Appointment pages */}
+            <Route
+              path="/appointment"
+              element={
+                  <AppointmentListPage />
+              }
+            />
+            <Route
+              path="/appointmentupdate/:appointmentId"
+              element={
+                <ProtectedRoute>
+                  <AppointmentUpdatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/appointment/book/:availableDayId"
+              element={<AppointmentBookPage />}
+            />
+            <Route 
+              path="/appointment/manage"
+              element={<AppointmentManagePage />}
+            />
+            <Route
+              path="/appointmentdelete/:appointmentId"
+              element={<AppointmentDeletePage />}
+            />
+            <Route
+              path="/appointmentdetails/:appointmentId"
+              element={<AppointmentDetailsPage />}
+            />
+
+            {/* Patient pages */}
+            <Route
+              path="/patients"
+              element={
+                 <PatientListPage />
+              }
+            />
+            <Route
+              path="/patientcreate"
+              element={
+                <ProtectedRoute>
+                  <PatientCreatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patientupdate/:patientId"
+              element={
+                <ProtectedRoute>
+                  <PatientUpdatePage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Personnel pages */}
+            <Route
+              path="/personnels"
+              element={
+                  <PersonnelListPage />
+              }
+            />
+            <Route
+              path="/personnelcreate"
+              element={
+                <ProtectedRoute>
+                  <PersonnelCreatePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/personnelupdate/:personnelId"
+              element={
+                <ProtectedRoute>
+                  <PersonnelUpdatePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Container>
+      </Router>
+    </AuthProvider>
+  );
+};
+
+export default App;

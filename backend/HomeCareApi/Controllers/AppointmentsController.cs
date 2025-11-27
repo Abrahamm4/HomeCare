@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using HomeCareApi.DAL;
+﻿using HomeCareApi.DAL;
 using HomeCareApi.Models;
 using HomeCareApi.Models.Dto;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,6 +45,7 @@ namespace HomeCareApi.Controllers
         };
 
         // GET: api/appointments
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppointmentDto>>> GetAll()
         {
@@ -78,6 +80,7 @@ namespace HomeCareApi.Controllers
 
         // POST: api/appointments (Booking endpoint)
         // Patient books using an AvailableDay id. Marks the slot as booked by creating the appointment linked to that AvailableDay.
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<AppointmentDto>> Book([FromBody] BookAppointmentRequest request)
         {

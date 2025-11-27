@@ -1,4 +1,4 @@
 export interface Personnel {
-  id: number;  // IKKE optional
+  id: number;  // Not optional
   name: string;
 }
