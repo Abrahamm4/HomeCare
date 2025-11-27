@@ -25,9 +25,13 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
   const [endTime, setEndTime] = useState<string>("");
 
   useEffect(() => {
-    setPersonnelId(
-      initialData?.personnelId.toString() || personnels[0]?.id.toString() || ""
-    );
+    // Ensure we pick a valid personnelId: initialData OR first option OR empty
+    const resolvedPersonnelId =
+      initialData?.personnelId?.toString() ||
+      (personnels.length > 0 ? personnels[0].id.toString() : "");
+
+    setPersonnelId(resolvedPersonnelId);
+
     setDate(initialData?.date ? initialData.date.split("T")[0] : "");
     setStartTime(initialData?.startTime || "");
     setEndTime(initialData?.endTime || "");
@@ -39,7 +43,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
     event.preventDefault();
 
     const availableDayInput: AvailableDayInput & { id?: number } = {
-      ...(isUpdate && { id: initialData?.id }),
+      ...(isUpdate && initialData?.id ? { id: initialData.id } : {}),
       personnelId: Number(personnelId),
       date,
       startTime,
@@ -55,12 +59,16 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
         <Form.Label>Personnel</Form.Label>
         <Form.Select
           value={personnelId}
-          onChange={e => setPersonnelId(e.target.value)}
+          onChange={(e) => setPersonnelId(e.target.value)}
           required
         >
-          <option value="" disabled>Select Personnel</option>
-          {personnels.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
+          <option value="" disabled>
+            Select Personnel
+          </option>
+          {personnels.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
           ))}
         </Form.Select>
       </Form.Group>
@@ -70,7 +78,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
         <Form.Control
           type="date"
           value={date}
-          onChange={e => setDate(e.target.value)}
+          onChange={(e) => setDate(e.target.value)}
           required
         />
       </Form.Group>
@@ -80,7 +88,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
         <Form.Control
           type="time"
           value={startTime}
-          onChange={e => setStartTime(e.target.value)}
+          onChange={(e) => setStartTime(e.target.value)}
           required
         />
       </Form.Group>
@@ -90,7 +98,7 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
         <Form.Control
           type="time"
           value={endTime}
-          onChange={e => setEndTime(e.target.value)}
+          onChange={(e) => setEndTime(e.target.value)}
           required
         />
       </Form.Group>
@@ -98,7 +106,13 @@ const AvailableDaysForm: React.FC<AvailableDaysFormProps> = ({
       <Button variant="primary" type="submit">
         {isUpdate ? "Update Available Day" : "Create Available Day"}
       </Button>
-      <Button variant="secondary" onClick={onCancel} className="ms-2">
+
+      <Button
+        variant="secondary"
+        type="button" // prevents accidental submit (same as PatientForm)
+        onClick={onCancel}
+        className="ms-2"
+      >
         Cancel
       </Button>
     </Form>

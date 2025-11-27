@@ -10,6 +10,7 @@ import AvailableDayCreatePage from './AvailableDays/AvailableDayCreatePage'
 import AvailableDayUpdatePage from './AvailableDays/AvailableDayUpdatePage'
 import AvailableDayDeletePage from './AvailableDays/AvailableDayDeletePage'
 import AvailableDayDetailsPage from './AvailableDays/AvailableDayDetailsPage'
+
 // Appointment
 import AppointmentListPage from './Appointment/AppointmentListPage'
 import AppointmentBookPage from './Appointment/AppointmentBookPage'
@@ -17,6 +18,7 @@ import AppointmentUpdatePage from './Appointment/AppointmentUpdatePage'
 import AppointmentManagePage from './Appointment/AppointmentManagePage'
 import AppointmentDeletePage from './Appointment/AppointmentDeletePage'
 import AppointmentDetailsPage from './Appointment/AppointmentDetailsPage'
+
 // Patients
 import PatientListPage from "./Patient/PatientListPage";
 import PatientCreatePage from "./Patient/PatientCreatePage";
@@ -40,6 +42,8 @@ const App: React.FC = () => {
         <NavMenu />
         <Container className="mt-3">
           <Routes>
+
+            {/* Home */}
             <Route path="/" element={<HomePage />} />
 
             {/* Auth */}
@@ -47,44 +51,39 @@ const App: React.FC = () => {
             <Route path="/register" element={<RegisterPage />} />
 
             {/* Available Days pages */}
+            <Route path="/availabledays" element={<AvailableDaysListPage />} />
+
             <Route
-              path="/availabledays"
-              element={
-                  <AvailableDaysListPage />
-              }
-            />
-            <Route
-              path="/availabledayscreate"
+              path="/availabledays/create"
               element={
                 <ProtectedRoute>
                   <AvailableDayCreatePage />
                 </ProtectedRoute>
               }
             />
+
             <Route
-              path="/availabledaysupdate/:availableDayId"
+              path="/availabledays/edit/:availableDayId"
               element={
                 <ProtectedRoute>
                   <AvailableDayUpdatePage />
                 </ProtectedRoute>
               }
             />
+
             <Route
-              path="/availabledaysdelete/:availableDayId"
-              element={<AvailableDayDeletePage/>}
+              path="/availabledays/delete/:availableDayId"
+              element={<AvailableDayDeletePage />}
             />
+
             <Route
-              path="/availabledaysdetails/:availableDayId"
-              element={<AvailableDayDetailsPage/>}
+              path="/availabledays/details/:availableDayId"
+              element={<AvailableDayDetailsPage />}
             />
 
             {/* Appointment pages */}
-            <Route
-              path="/appointment"
-              element={
-                  <AppointmentListPage />
-              }
-            />
+            <Route path="/appointment" element={<AppointmentListPage />} />
+
             <Route
               path="/appointmentupdate/:appointmentId"
               element={
@@ -93,30 +92,30 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/appointment/book/:availableDayId"
               element={<AppointmentBookPage />}
             />
-            <Route 
+
+            <Route
               path="/appointment/manage"
               element={<AppointmentManagePage />}
             />
+
             <Route
               path="/appointmentdelete/:appointmentId"
               element={<AppointmentDeletePage />}
             />
+
             <Route
               path="/appointmentdetails/:appointmentId"
               element={<AppointmentDetailsPage />}
             />
 
             {/* Patient pages */}
-            <Route
-              path="/patients"
-              element={
-                 <PatientListPage />
-              }
-            />
+            <Route path="/patients" element={<PatientListPage />} />
+
             <Route
               path="/patientcreate"
               element={
@@ -125,6 +124,7 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/patientupdate/:patientId"
               element={
@@ -135,12 +135,8 @@ const App: React.FC = () => {
             />
 
             {/* Personnel pages */}
-            <Route
-              path="/personnels"
-              element={
-                  <PersonnelListPage />
-              }
-            />
+            <Route path="/personnels" element={<PersonnelListPage />} />
+
             <Route
               path="/personnelcreate"
               element={
@@ -149,6 +145,7 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/personnelupdate/:personnelId"
               element={
@@ -158,7 +155,9 @@ const App: React.FC = () => {
               }
             />
 
+            {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />
+
           </Routes>
         </Container>
       </Router>
