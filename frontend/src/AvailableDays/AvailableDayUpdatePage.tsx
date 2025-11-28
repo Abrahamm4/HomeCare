@@ -1,60 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import AvailableDaysForm from './AvailableDayForm';
-import type { AvailableDay } from '../types/AvailableDay';
-import * as AvailableDayService from './AvailableDayService';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Alert } from "react-bootstrap";
+import AvailableDaysForm from "./AvailableDayForm";
+import type { AvailableDay, AvailableDayInput } from "../types/AvailableDay";
+import type { Personnel } from "../types/Personnel";
+import * as AvailableDayService from "./AvailableDayService";
+import * as PersonnelService from "../Personnel/PersonnelService";
 
 const AvailableDayUpdatePage: React.FC = () => {
-  const { AvailableDayId } = useParams<{ AvailableDayId: string }>();
+  const { availableDayId } = useParams<{ availableDayId: string }>();
   const navigate = useNavigate();
-  const [day, setAvailableDay] = useState<AvailableDay | null>(null);
+
+  const [day, setDay] = useState<AvailableDay | null>(null);
+  const [personnels, setPersonnels] = useState<Personnel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchDay = async () => {
+    const loadData = async () => {
+      setError(null);
+
       try {
-        if (!AvailableDayId) {
-          setError('No AvailableDay id provided');
+        if (!availableDayId) {
+          setError("No Available Day ID provided");
           setLoading(false);
           return;
         }
-        const data = await AvailableDayService.fetchAvailableDayById(Number(AvailableDayId));
-        setAvailableDay(data);
-      } catch (error) {
-        setError('Failed to fetch AvailableDay');
-        console.error('There was a problem with the fetch operation:', error);
+
+        const [dayData, personnelList] = await Promise.all([
+          AvailableDayService.fetchAvailableDayById(Number(availableDayId)),
+          PersonnelService.fetchPersonnels(),
+        ]);
+
+        setDay(dayData);
+        setPersonnels(personnelList);
+      } catch (err) {
+        console.error("Failed to fetch available day:", err);
+
+        if (err instanceof Error) setError(err.message);
+        else setError("Failed to fetch available day");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDay();
-  }, [AvailableDayId]);
+    void loadData();
+  }, [availableDayId]);
 
-  const handleAvailableDayUpdated = async (updated: AvailableDay) => {
+  const handleAvailableDayUpdated = async (dayInput: AvailableDayInput) => {
+    setError(null);
+
     try {
-      const data = await AvailableDayService.updateAvailableDay(Number(AvailableDayId), updated);
-      console.log('AvailableDay updated successfully:', data);
-      navigate('/AvailableDays');
-    } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
+      if (!availableDayId) {
+        setError("Missing availableDayId");
+        return;
+      }
+
+      await AvailableDayService.updateAvailableDay(
+        Number(availableDayId),
+        dayInput
+      );
+
+      navigate("/availabledays");
+    } catch (err) {
+      console.error("Failed to update Available Day:", err);
+
+      if (err instanceof Error) setError(err.message);
+      else
+        setError(
+          "An unexpected error occurred while updating the available day."
+        );
     }
   };
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-  if (!day) return <p>No AvailableDay found</p>;
 
   return (
     <div>
-      <h2>Update AvailableDay</h2>
-      <AvailableDaysForm
-        onAvailableDayChanged={handleAvailableDayUpdated}
-        availableDayId={day.id}
-        isUpdate={true}
-        initialData={day}
-      />
+      <h2>Update Available Day</h2>
+
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      {!day ? (
+        <p>No Available Day found</p>
+      ) : (
+        <AvailableDaysForm
+          isUpdate={true}
+          initialData={day}
+          onAvailableDayChanged={handleAvailableDayUpdated}
+          personnels={personnels}
+        />
+      )}
     </div>
   );
 };

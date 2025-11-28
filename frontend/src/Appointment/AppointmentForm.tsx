@@ -1,65 +1,113 @@
-import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import type { Appointment } from '../types/Appointment';
+import React, { useState } from "react";
+import { Form, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import type { Appointment } from "../types/Appointment";
+import type { AvailableDay } from "../types/AvailableDay";
+import type { Patient } from "../types/Patient";
 
-interface Props {
-  onAppointmentChanged: (updatedAppointment: Appointment) => void | Promise<void>;
-  initialData?: Appointment;
-  isUpdate?: boolean;
+interface AppointmentFormProps {
+  appointment: Appointment;
+  availableDays: AvailableDay[];
+  patients: Patient[];
+  onSubmit: (input: {
+    patientId: number;
+    availableDayId: number;
+    notes?: string;
+  }) => void;
 }
 
-const AppointmentForm: React.FC<Props> = ({ onAppointmentChanged, initialData, isUpdate = false }) => {
-  const [date, setDate] = useState<string>(initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : '');
-  const [notes, setNotes] = useState<string>(initialData?.notes || '');
-  const [patientId, setPatientId] = useState<number | ''>(initialData?.patientId || '');
-  const [personnelId, setPersonnelId] = useState<number>(initialData?.personnelId || 0);
-  const [availableDayId, setAvailableDayId] = useState<number>(initialData?.availableDayId || 0);
-
+const AppointmentForm: React.FC<AppointmentFormProps> = ({
+  appointment,
+  availableDays,
+  patients,
+  onSubmit,
+}) => {
   const navigate = useNavigate();
+
+  const [patientId, setPatientId] = useState<number>(appointment.patientId);
+  const [availableDayId, setAvailableDayId] = useState<number>(
+    appointment.availableDayId
+  );
+  const [notes, setNotes] = useState<string>(appointment.notes || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const appointment: Appointment = {
-      id: initialData?.id || 0,
-      date,
-      notes,
-      patientId: patientId || null,
-      personnelId,
-      availableDayId,
-    };
-    onAppointmentChanged(appointment);
+    onSubmit({ patientId, availableDayId, notes });
   };
+
+  const onCancel = () => navigate(-1);
 
   return (
     <Form onSubmit={handleSubmit}>
-      <Form.Group className="mb-3">
-        <Form.Label>Date</Form.Label>
-        <Form.Control type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+      {/* Patient selection */}
+      <Form.Group className="mb-3" controlId="patient">
+        <Form.Label>Patient</Form.Label>
+        <Form.Select
+          value={patientId}
+          onChange={(e) => setPatientId(Number(e.target.value))}
+          required
+        >
+          <option value="" disabled>
+            Select Patient
+          </option>
+
+          {patients.map((p) => (
+            <option key={p.patientId} value={p.patientId}>
+              {p.name}
+            </option>
+          ))}
+        </Form.Select>
       </Form.Group>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Notes</Form.Label>
-        <Form.Control type="text" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={200} />
+      {/* Available slot selection */}
+      <Form.Group className="mb-3" controlId="availableDay">
+        <Form.Label>Appointment Slot</Form.Label>
+        <Form.Select
+          value={availableDayId}
+          onChange={(e) => setAvailableDayId(Number(e.target.value))}
+          required
+        >
+          <option value="" disabled>
+            Select Appointment Slot
+          </option>
+
+          {availableDays.map((day) => {
+            const date = day.date.split("T")[0];
+
+            return (
+              <option key={day.id} value={day.id}>
+                {day.personnel?.name || "Unknown"} — {date}{" "}
+                {day.startTime} - {day.endTime}{" "}
+                {day.isBooked && "(Booked)"}
+              </option>
+            );
+          })}
+        </Form.Select>
       </Form.Group>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Patient ID</Form.Label>
-        <Form.Control type="number" value={patientId} onChange={(e) => setPatientId(Number(e.target.value))} />
+      {/* Notes */}
+      <Form.Group className="mb-3" controlId="notes">
+        <Form.Label>Notes / Tasks</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
       </Form.Group>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Personnel ID</Form.Label>
-        <Form.Control type="number" value={personnelId} onChange={(e) => setPersonnelId(Number(e.target.value))} required />
-      </Form.Group>
+      <Button type="submit" variant="primary">
+        Update Appointment
+      </Button>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Available Day ID</Form.Label>
-        <Form.Control type="number" value={availableDayId} onChange={(e) => setAvailableDayId(Number(e.target.value))} required />
-      </Form.Group>
-
-      <Button variant="primary" type="submit">{isUpdate ? 'Update' : 'Create'}</Button>
-      <Button variant="secondary" className="ms-2" onClick={() => navigate(-1)}>Cancel</Button>
+      <Button
+        variant="secondary"
+        type="button"
+        onClick={onCancel}
+        className="ms-2"
+      >
+        Cancel
+      </Button>
     </Form>
   );
 };

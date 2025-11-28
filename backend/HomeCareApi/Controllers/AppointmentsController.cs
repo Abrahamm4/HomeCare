@@ -45,7 +45,6 @@ namespace HomeCareApi.Controllers
         };
 
         // GET: api/appointments
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppointmentDto>>> GetAll()
         {
