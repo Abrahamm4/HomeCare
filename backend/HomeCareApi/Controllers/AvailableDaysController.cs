@@ -7,7 +7,7 @@ namespace HomeCareApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AvailableDaysController : ControllerBase
+    public class AvailableDaysController : BaseApiController
     {
         private readonly IAvailableDayRepository _days;
         private readonly IPersonnelRepository _personnel;
@@ -70,7 +70,7 @@ namespace HomeCareApi.Controllers
         public async Task<ActionResult<AvailableDayDto>> GetById(int id)
         {
             var day = await _days.GetByIdWithRelationsAsync(id);
-            if (day == null) return NotFound();
+            if (day == null) return NotFoundProblem(detail: $"AvailableDay {id} not found");
             return Ok(ToDto(day));
         }
 
@@ -117,7 +117,7 @@ namespace HomeCareApi.Controllers
             if (!ok)
             {
                 _logger.LogError("[AvailableDaysController] Create failed {@AvailableDay}", model);
-                return Problem("Could not create available day");
+                return InternalServerErrorProblem(detail: "Could not create available day");
             }
 
             return CreatedAtAction(nameof(GetById), new { id = model.Id }, ToDto(model));
@@ -127,7 +127,7 @@ namespace HomeCareApi.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] AvailableDay model)
         {
-            if (id != model.Id) return BadRequest("Id mismatch");
+            if (id != model.Id) return BadRequestProblem(detail: "Id mismatch");
 
             if (model.Date.Date < DateTime.Today)
                 ModelState.AddModelError(nameof(model.Date), "Date cannot be a past date.");
@@ -148,7 +148,7 @@ namespace HomeCareApi.Controllers
             if (!ok)
             {
                 _logger.LogError("[AvailableDaysController] Update failed {@AvailableDay}", model);
-                return Problem("Could not update available day");
+                return InternalServerErrorProblem(detail: "Could not update available day");
             }
 
             return NoContent();
@@ -159,7 +159,7 @@ namespace HomeCareApi.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var ok = await _days.DeleteAsync(id);
-            if (!ok) return NotFound();
+            if (!ok) return NotFoundProblem(detail: $"AvailableDay {id} not found");
             return NoContent();
         }
     }

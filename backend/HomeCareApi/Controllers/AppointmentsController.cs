@@ -12,7 +12,7 @@ namespace HomeCareApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AppointmentsController : ControllerBase
+    public class AppointmentsController : BaseApiController
     {
         private readonly IAppointmentRepository _appointments;
         private readonly IAvailableDayRepository _days;
@@ -57,7 +57,7 @@ namespace HomeCareApi.Controllers
         public async Task<ActionResult<AppointmentDto>> GetById(int id)
         {
             var appt = await _appointments.GetByIdAsync(id);
-            if (appt == null) return NotFound();
+            if (appt == null) return NotFoundProblem(detail: $"Appointment {id} not found");
             return Ok(ToDto(appt));
         }
 
@@ -87,12 +87,12 @@ namespace HomeCareApi.Controllers
 
             // Validate patient exists
             var patient = await _patients.GetByIdAsync(request.PatientId);
-            if (patient == null) return NotFound($"Patient {request.PatientId} not found");
+            if (patient == null) return NotFoundProblem(detail: $"Patient {request.PatientId} not found");
 
             // Validate available day exists and is free
             var day = await _days.GetByIdWithRelationsAsync(request.AvailableDayId);
-            if (day == null) return NotFound($"AvailableDay {request.AvailableDayId} not found");
-            if (day.Appointment != null) return Conflict("This slot is already booked");
+            if (day == null) return NotFoundProblem(detail: $"AvailableDay {request.AvailableDayId} not found");
+            if (day.Appointment != null) return ConflictProblem(detail: "This slot is already booked");
 
             var appt = new Appointment
             {
@@ -107,7 +107,7 @@ namespace HomeCareApi.Controllers
             if (!ok)
             {
                 _logger.LogError("[AppointmentsController] Book failed {@Appointment}", appt);
-                return Problem("Could not book appointment");
+                return InternalServerErrorProblem(detail: "Could not book appointment");
             }
 
             return CreatedAtAction(nameof(GetById), new { id = appt.AppointmentId }, ToDto(appt));
@@ -117,7 +117,7 @@ namespace HomeCareApi.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] Appointment model)
         {
-            if (model == null || id != model.AppointmentId) return BadRequest("Id mismatch");
+            if (model == null || id != model.AppointmentId) return BadRequestProblem(detail: "Id mismatch");
             if (model.Date == default)
                 ModelState.AddModelError(nameof(model.Date), "Date is required.");
             if (model.PersonnelId <= 0)
@@ -130,7 +130,7 @@ namespace HomeCareApi.Controllers
             if (!ok)
             {
                 _logger.LogError("[AppointmentsController] Update failed {@Appointment}", model);
-                return Problem("Could not update appointment");
+                return InternalServerErrorProblem(detail: "Could not update appointment");
             }
             return NoContent();
         }
@@ -140,7 +140,7 @@ namespace HomeCareApi.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var ok = await _appointments.DeleteAsync(id);
-            if (!ok) return NotFound();
+            if (!ok) return NotFoundProblem(detail: $"Appointment {id} not found");
             return NoContent();
         }
     }

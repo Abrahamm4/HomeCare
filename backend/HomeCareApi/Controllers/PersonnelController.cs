@@ -12,7 +12,7 @@ namespace HomeCareApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PersonnelController : ControllerBase
+    public class PersonnelController : BaseApiController
     {
         private readonly IPersonnelRepository _personnels;
         private readonly ILogger<PersonnelController> _logger;
@@ -42,7 +42,7 @@ namespace HomeCareApi.Controllers
         public async Task<ActionResult<PersonnelDto>> GetById(int id)
         {
             var entity = await _personnels.GetByIdAsync(id);
-            if (entity == null) return NotFound();
+            if (entity == null) return NotFoundProblem(detail: $"Personnel {id} not found");
             return Ok(ToDto(entity));
         }
 
@@ -50,7 +50,7 @@ namespace HomeCareApi.Controllers
         [HttpPost]
         public async Task<ActionResult<PersonnelDto>> Create([FromBody] Personnel model)
         {
-            if (model == null) return BadRequest();
+            if (model == null) return BadRequestProblem();
             if (string.IsNullOrWhiteSpace(model.Name))
                 ModelState.AddModelError(nameof(model.Name), "Name is required.");
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
@@ -58,7 +58,7 @@ namespace HomeCareApi.Controllers
             if (!ok)
             {
                 _logger.LogError("[PersonnelController] Create failed {@Personnel}", model);
-                return Problem("Could not create personnel");
+                return InternalServerErrorProblem(detail: "Could not create personnel");
             }
             return CreatedAtAction(nameof(GetById), new { id = model.Id }, ToDto(model));
         }
@@ -67,7 +67,7 @@ namespace HomeCareApi.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] Personnel model)
         {
-            if (model == null || id != model.Id) return BadRequest("Id mismatch");
+            if (model == null || id != model.Id) return BadRequestProblem(detail: "Id mismatch");
             if (string.IsNullOrWhiteSpace(model.Name))
                 ModelState.AddModelError(nameof(model.Name), "Name is required.");
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
@@ -75,7 +75,7 @@ namespace HomeCareApi.Controllers
             if (!ok)
             {
                 _logger.LogError("[PersonnelController] Update failed {@Personnel}", model);
-                return Problem("Could not update personnel");
+                return InternalServerErrorProblem(detail: "Could not update personnel");
             }
             return NoContent();
         }
@@ -85,7 +85,7 @@ namespace HomeCareApi.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var ok = await _personnels.DeleteAsync(id);
-            if (!ok) return NotFound();
+            if (!ok) return NotFoundProblem(detail: $"Personnel {id} not found");
             return NoContent();
         }
     }

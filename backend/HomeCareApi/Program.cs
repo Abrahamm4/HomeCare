@@ -8,6 +8,8 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 using System.Text;
+using Microsoft.AspNetCore.Mvc; // for ApiBehaviorOptions
+using System.Diagnostics;
 
 namespace HomeCareApi
 {
@@ -18,7 +20,7 @@ namespace HomeCareApi
             var builder = WebApplication.CreateBuilder(args);
 
             // ===============================
-            // ?? Logging (Serilog)
+            // Logging (Serilog)
             // ===============================
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             Log.Logger = new LoggerConfiguration()
@@ -39,12 +41,27 @@ namespace HomeCareApi
             }
 
             // ===============================
-            // ?? Services
+            // Services
             // ===============================
             builder.Services.AddControllers().AddNewtonsoftJson(options =>
             {
-                // Example: configure serializer settings
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+
+            // Validation errors uniform (will map to ValidationProblemDetails automatically)
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var problem = new ValidationProblemDetails(context.ModelState)
+                    {
+                        Status = StatusCodes.Status400BadRequest,
+                        Title = "Validation Failed",
+                        Instance = context.HttpContext.Request.Path
+                    };
+                    Enrich(problem, context.HttpContext);
+                    return new ObjectResult(problem) { StatusCode = problem.Status };
+                };
             });
 
             // Database (SQLite)
@@ -110,7 +127,6 @@ namespace HomeCareApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HomeCare API", Version = "v1" });
 
-                // Add Bearer token support in Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -136,38 +152,84 @@ namespace HomeCareApi
              });
             });
 
-
-            // CORS (Cross-Origin Resource Sharing)
+            // Secondary CORS policy (not used) retained for backward compatibility if referenced elsewhere
             builder.Services.AddCors(options =>
 {
-    options.AddPolicy("CorsPolicy", builder =>
+    options.AddPolicy("CorsPolicy", b =>
     {
-        builder.WithOrigins("http://localhost:5173") // Allow requests from the React frontend
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+        b.WithOrigins("http://localhost:5173")
+         .AllowAnyMethod()
+         .AllowAnyHeader()
+         .AllowCredentials();
     });
 });
 
             var app = builder.Build();
 
             // ===============================
-            // ?? Test database connection
+            // Central exception handler
+            // ===============================
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    await next();
+                }
+                catch (Exception ex)
+                {
+                    var traceId = Activity.Current?.Id ?? context.TraceIdentifier;
+                    Log.Error(ex, "Unhandled exception {TraceId}: {Message}", traceId, ex.Message);
+                    var problem = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status500InternalServerError,
+                        Title = "Internal Server Error",
+                        Detail = app.Environment.IsDevelopment() ? ex.Message : null,
+                        Instance = context.Request.Path
+                    };
+                    problem.Extensions["traceId"] = traceId;
+                    problem.Extensions["errorCode"] = problem.Status;
+                    problem.Extensions["method"] = context.Request.Method;
+                    context.Response.StatusCode = problem.Status.Value;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsJsonAsync(problem);
+                }
+            });
+
+            // Convert non-success status codes (like404 for unknown routes) into ProblemDetails
+            app.UseStatusCodePages(async statusCtx =>
+            {
+                var resp = statusCtx.HttpContext.Response;
+                if (resp.StatusCode >=400 && !resp.HasStarted)
+                {
+                    var problem = new ProblemDetails
+                    {
+                        Status = resp.StatusCode,
+                        Title = resp.StatusCode ==404 ? "Not Found" : "Error",
+                        Instance = statusCtx.HttpContext.Request.Path
+                    };
+                    Enrich(problem, statusCtx.HttpContext);
+                    resp.ContentType = "application/json";
+                    await resp.WriteAsJsonAsync(problem);
+                }
+            });
+
+            // ===============================
+            // Test database connection
             // ===============================
             try
             {
                 using var scope = app.Services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<HomeCareDbContext>();
                 db.Database.CanConnect();
-                Console.WriteLine("? Database connection established!");
+                Console.WriteLine("Database connection established.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"? Database connection failed: {ex.Message}");
+                Console.WriteLine($"Database connection failed: {ex.Message}");
             }
 
             // ===============================
-            // ?? Middleware pipeline
+            // Middleware pipeline
             // ===============================
             if (app.Environment.IsDevelopment())
             {
@@ -182,7 +244,7 @@ namespace HomeCareApi
             app.MapControllers();
 
             // ===============================
-            // ?? Optional: seed database (dev)
+            // Optional: seed database (dev)
             // ===============================
             if (app.Environment.IsDevelopment())
             {
@@ -191,7 +253,7 @@ namespace HomeCareApi
                 if (!db.Patients.Any())
                 {
                     DBInit.Seed(app);
-                    Console.WriteLine("?? Database seeded.");
+                    Console.WriteLine("Database seeded.");
                 }
             }
             // ===============================
@@ -206,8 +268,16 @@ namespace HomeCareApi
                 DbSeedAuth.SeedUsers(userManager).Wait();
             }
 
-
             app.Run();
+        }
+
+        private static void Enrich(ProblemDetails problem, HttpContext httpContext)
+        {
+            var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+            problem.Extensions["traceId"] = traceId;
+            problem.Extensions["method"] = httpContext.Request.Method;
+            if (!problem.Extensions.ContainsKey("errorCode"))
+                problem.Extensions["errorCode"] = problem.Status;
         }
     }
 }
