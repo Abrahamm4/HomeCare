@@ -5,6 +5,11 @@ import { useAuth } from "../Auth/AuthContext";
 
 const NavMenu: React.FC = () => {
   const { isLoggedIn, user, logout } = useAuth();
+  
+  console.log("NavMenu - isLoggedIn:", isLoggedIn, "user:", user);
+  
+  const roles = user?.role ? (Array.isArray(user.role) ? user.role : [user.role]) : [];
+  const roleLabel = roles.length > 0 ? roles.join(", ") : "";
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
@@ -48,6 +53,7 @@ const NavMenu: React.FC = () => {
               <>
                 <Navbar.Text className="me-2">
                   Logged in as: <strong>{user?.sub}</strong>
+                  {roleLabel && <> <em>({roleLabel})</em></>}
                 </Navbar.Text>
                 <Nav.Link onClick={logout}>Logout</Nav.Link>
               </>

@@ -12,7 +12,7 @@ const LoginPage: React.FC = () => {
   const [form, setForm] = useState<LoginDto>({ username: "", password: "" });
   const [error, setError] = useState<string | null>(null);
 
-  const from = location.state?.from?.pathname || "/patients";
+  const from = location.state?.from?.pathname || "/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

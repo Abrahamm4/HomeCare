@@ -24,7 +24,23 @@ export function saveToken(token: string | null): void {
 export function decodeToken(token: string | null): User | null {
   if (!token) return null;
   try {
-    return jwtDecode<User>(token);
+    const decoded = jwtDecode<any>(token);
+    console.log("Decoded JWT:", decoded);
+
+    // Map ASP.NET Identity full URI claims to simple properties
+    const user: User = {
+      sub: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || decoded.sub,
+    nameid: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || decoded.nameid,
+      role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || decoded.role,
+      iat: decoded.iat,
+      exp: decoded.exp,
+      iss: decoded.iss,
+ aud: decoded.aud,
+      jti: decoded.jti,
+    };
+
+    console.log("Mapped User:", user);
+    return user;
   } catch (error) {
     console.error("Failed to decode token", error);
     return null;
@@ -46,6 +62,7 @@ export async function login(
   }
 
   const data = (await response.json()) as AuthResponse;
+  console.log("Token from backend:", data.token);
   const user = decodeToken(data.token);
   if (!user) {
     throw new Error("Invalid token");
