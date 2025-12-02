@@ -1,5 +1,7 @@
 ﻿using HomeCareApi.Models;
 using Microsoft.AspNetCore.Identity;
+using HomeCareApi.DAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeCareApi.DAL
 {
@@ -80,6 +82,44 @@ namespace HomeCareApi.DAL
                         $"{string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
             }
+        }
+
+        // Link Identity users to domain entities for testing/demo
+        public static async Task SeedLinkedProfiles(UserManager<AuthUser> userManager, HomeCareDbContext db)
+        {
+            // Patients: every Identity user in Patient role gets a Patient with AuthUserId
+            var patientUsers = await userManager.GetUsersInRoleAsync("Patient");
+            foreach (var user in patientUsers)
+            {
+                var exists = await db.Patients.AsNoTracking().AnyAsync(p => p.AuthUserId == user.Id);
+                if (!exists)
+                {
+                    db.Patients.Add(new Patient
+                    {
+                        Name = user.UserName ?? user.Email ?? "",
+                        Email = user.Email,
+                        Phone = null,
+                        AuthUserId = user.Id
+                    });
+                }
+            }
+
+            // Personnel: Identity users in Personnel role get a Personnel with AuthUserId
+            var personnelUsers = await userManager.GetUsersInRoleAsync("Personnel");
+            foreach (var user in personnelUsers)
+            {
+                var exists = await db.Personnels.AsNoTracking().AnyAsync(p => p.AuthUserId == user.Id);
+                if (!exists)
+                {
+                    db.Personnels.Add(new Personnel
+                    {
+                        Name = user.UserName ?? user.Email ?? "",
+                        AuthUserId = user.Id
+                    });
+                }
+            }
+
+            await db.SaveChangesAsync();
         }
     }
 }

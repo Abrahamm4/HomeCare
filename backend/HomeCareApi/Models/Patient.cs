@@ -19,10 +19,6 @@ namespace HomeCareApi.Models
         // Link to ASP.NET Identity user (string key). Optional for seeded/demo data.
         public string? AuthUserId { get; set; }
 
-        // Not mapped navigation to avoid cross-context FK (Identity lives in a separate DbContext)
-        [NotMapped]
-        public AuthUser? AuthUser { get; set; }
-
         // Navigation property: one patient can have many appointments
         public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }

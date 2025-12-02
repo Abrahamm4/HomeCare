@@ -270,6 +270,10 @@ namespace HomeCareApi
 
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
                 DbSeedAuth.SeedUsers(userManager).Wait();
+
+                // Link seeded users to domain profiles
+                var db = scope.ServiceProvider.GetRequiredService<HomeCareDbContext>();
+                DbSeedAuth.SeedLinkedProfiles(userManager, db).Wait();
             }
 
             app.Run();
