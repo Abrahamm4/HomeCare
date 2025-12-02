@@ -27,10 +27,28 @@ namespace HomeCareApi.DAL
                 role: "Admin");
 
             await CreateUserIfNotExists(userManager,
-                username: "personnel",
-                email: "personnel@homecare.com",
-                password: "Personnel123!",
+                username: "personnel1",
+                email: "personnel1@homecare.com",
+                password: "Personnel1!",
                 role: "Personnel");
+
+            await CreateUserIfNotExists(userManager,
+                username: "personnel2",
+                email: "personnel2@homecare.com",
+                password: "Personnel2!",
+                role: "Personnel");
+
+            await CreateUserIfNotExists(userManager,
+                username: "patient1",
+                email: "patient1@homecare.com",
+                password: "Patient1!",
+                role: "Patient");
+
+            await CreateUserIfNotExists(userManager,
+                username: "patient2",
+                email: "patient2@homecare.com",
+                password: "Patient2!",
+                role: "Patient");
         }
 
         private static async Task CreateUserIfNotExists(

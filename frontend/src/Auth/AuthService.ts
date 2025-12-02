@@ -24,7 +24,7 @@ export function saveToken(token: string | null): void {
 export function decodeToken(token: string | null): User | null {
   if (!token) return null;
   try {
-    const decoded = jwtDecode<any>(token);
+    const decoded = jwtDecode<User>(token);
     console.log("Decoded JWT:", decoded);
 
     // Map ASP.NET Identity full URI claims to simple properties
