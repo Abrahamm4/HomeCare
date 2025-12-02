@@ -1,5 +1,6 @@
 ﻿using HomeCareApi.Models;
 using HomeCareApi.Models.Dto;
+using HomeCareApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -17,17 +18,20 @@ namespace HomeCare.Controllers
         private readonly SignInManager<AuthUser> _signInManager;
         private readonly IConfiguration _config;
         private readonly ILogger<AuthController> _logger;
+        private readonly UserLinkingService _userLinkingService;
 
         public AuthController(
             UserManager<AuthUser> userManager,
             SignInManager<AuthUser> signInManager,
             IConfiguration config,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            UserLinkingService userLinkingService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _config = config;
             _logger = logger;
+            _userLinkingService = userLinkingService;
         }
 
         [HttpPost("register")]
@@ -45,7 +49,12 @@ namespace HomeCare.Controllers
                 return BadRequestProblem(detail: string.Join("; ", result.Errors.Select(e => e.Description)));
 
             await _userManager.AddToRoleAsync(user, "Patient");
-            return Ok("User registered successfully.");
+            // Auto create Patient profile linked to the Identity user
+            await _userLinkingService.CreatePatientProfileAsync(user);
+
+            // Return JWT as normal
+            var token = await GenerateJwtTokenAsync(user);
+            return Ok(new { token });
         }
 
         [HttpPost("login")]
@@ -59,7 +68,7 @@ namespace HomeCare.Controllers
             if (!await _userManager.CheckPasswordAsync(user, dto.Password))
                 return UnauthorizedProblem(detail: "Invalid username or password.");
 
-            var token = GenerateJwtToken(user);
+            var token = await GenerateJwtTokenAsync(user);
             return Ok(new { token });
         }
 
@@ -70,11 +79,11 @@ namespace HomeCare.Controllers
             return Ok("Logged out.");
         }
 
-        private string GenerateJwtToken(AuthUser user)
+        private async Task<string> GenerateJwtTokenAsync(AuthUser user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var userRoles = _userManager.GetRolesAsync(user).Result;
+            var userRoles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
  {
  new Claim(ClaimTypes.Name, user.UserName!),

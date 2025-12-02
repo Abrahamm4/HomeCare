@@ -10,6 +10,7 @@ using Serilog.Events;
 using System.Text;
 using Microsoft.AspNetCore.Mvc; // for ApiBehaviorOptions
 using System.Diagnostics;
+using HomeCareApi.Services;
 
 namespace HomeCareApi
 {
@@ -120,6 +121,9 @@ namespace HomeCareApi
             builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             builder.Services.AddScoped<IPatientRepository, PatientRepository>();
             builder.Services.AddScoped<IPersonnelRepository, PersonnelRepository>();
+
+            // App services
+            builder.Services.AddScoped<UserLinkingService>();
 
             // Swagger (API documentation)
             builder.Services.AddEndpointsApiExplorer();
