@@ -76,7 +76,7 @@ namespace HomeCareApi.Controllers
         }
 
         // DELETE: api/patient/{id}
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Personnel")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
