@@ -43,7 +43,7 @@ namespace HomeCareApi.DAL
                 context.SaveChanges();
             }
 
-            // Hent nøkler
+            // Get keys
             var personnelsList = context.Personnels.ToList();
             if (!personnelsList.Any()) return;
 
