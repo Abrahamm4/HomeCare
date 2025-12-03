@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import type { LoginDto, RegisterDto } from "../types/Auth";
 import type { User } from "../types/User";
 
-const API_BASE_URL = "https://localhost:7272"; //Can be changed according to backend 
+const API_BASE_URL = "https://localhost:7272";
 const TOKEN_KEY = "homecare_jwt";
 
 interface AuthResponse {
@@ -27,15 +27,20 @@ export function decodeToken(token: string | null): User | null {
     const decoded = jwtDecode<User>(token);
     console.log("Decoded JWT:", decoded);
 
-    // Map ASP.NET Identity full URI claims to simple properties
     const user: User = {
-      sub: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || decoded.sub,
-    nameid: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || decoded.nameid,
-      role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || decoded.role,
+      sub:
+        decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ||
+        decoded.sub,
+      nameid:
+        decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] ||
+        decoded.nameid,
+      role:
+        decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+        decoded.role,
       iat: decoded.iat,
       exp: decoded.exp,
       iss: decoded.iss,
- aud: decoded.aud,
+      aud: decoded.aud,
       jti: decoded.jti,
     };
 
@@ -57,18 +62,27 @@ export async function login(
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "Login failed");
+    const errorBody = await response.json().catch(() => null);
+
+    // show only detail from error response
+    const message =
+      errorBody?.detail ||
+      errorBody?.title ||
+      "Login failed";
+
+    throw new Error(message);
   }
 
   const data = (await response.json()) as AuthResponse;
   console.log("Token from backend:", data.token);
+
   const user = decodeToken(data.token);
   if (!user) {
     throw new Error("Invalid token");
   }
 
   saveToken(data.token);
+
   return { token: data.token, user };
 }
 
@@ -80,8 +94,15 @@ export async function register(dto: RegisterDto): Promise<void> {
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "Registration failed");
+    const errorBody = await response.json().catch(() => null);
+
+    // Show only detail from error response
+    const message =
+      errorBody?.detail ||
+      errorBody?.title ||
+      "Registration failed";
+
+    throw new Error(message);
   }
 }
 

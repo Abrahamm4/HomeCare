@@ -6,42 +6,56 @@ import { useAuth } from "../Auth/AuthContext";
 const NavMenu: React.FC = () => {
   const { isLoggedIn, user, logout } = useAuth();
 
+  const role = user?.role;
+  const isPersonnel = role === "Personnel";
+  const isAdmin = role === "Admin";
+  const isAdminOrPersonnel = isAdmin || isPersonnel;
+
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
       <Container>
         <Navbar.Brand as={Link} to="/">
           HomeCare
         </Navbar.Brand>
+
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
+
+            {/* visible to everyone */}
             <Nav.Link as={Link} to="/">
               Home
             </Nav.Link>
 
-            {isLoggedIn && (user?.role === "Admin" || user?.role === "Personnel") && (
+            {/* Everyone sees available days */}
+            {isLoggedIn && (
               <Nav.Link as={Link} to="/availabledays">
                 Available Days
               </Nav.Link>
             )}
 
-            {isLoggedIn && (user?.role === "Admin" || user?.role === "Patient") && (
+            {/* Everyone can see appointments */}
+            {isLoggedIn && (
               <Nav.Link as={Link} to="/appointment">
                 Appointments
               </Nav.Link>
             )}
 
-            {isLoggedIn && user?.role === "Admin" && (
+            {/* Only Admin and Personnel */}
+            {isLoggedIn && isAdminOrPersonnel && (
               <>
                 <Nav.Link as={Link} to="/patients">
                   Patients
                 </Nav.Link>
+
                 <Nav.Link as={Link} to="/personnels">
                   Personnel
                 </Nav.Link>
               </>
             )}
           </Nav>
+
           <Nav>
             {isLoggedIn ? (
               <>

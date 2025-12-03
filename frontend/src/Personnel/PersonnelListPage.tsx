@@ -7,7 +7,7 @@ import * as PersonnelService from "./PersonnelService";
 import { useAuth } from "../Auth/AuthContext";
 
 const PersonnelListPage: React.FC = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
 
   const [personnels, setPersonnels] = useState<Personnel[]>([]);
@@ -91,7 +91,8 @@ const PersonnelListPage: React.FC = () => {
         onPersonnelDeleted={handlePersonnelDeleted}
       />
 
-      {isLoggedIn && (
+       {/* show add button only for admin */}
+      {isLoggedIn && user?.role === "Admin" && (
         <Button
           className="btn btn-primary mb-3 me-2"
           onClick={() => navigate("/personnelcreate")}

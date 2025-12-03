@@ -17,7 +17,14 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
   showPersonnel = true,
   showTimes = true,
 }) => {
-  const { isLoggedIn } = useAuth();
+
+  // Get role
+  const { isLoggedIn, user } = useAuth();
+
+  // Simple boolean helpers
+  const isPatient = user?.role === "Patient";
+  const canModify = isLoggedIn && !isPatient; 
+  // (Only Admin + Personnel can edit/delete)
 
   return (
     <Table striped bordered hover>
@@ -36,8 +43,8 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
 
           <th>Status</th>
 
-          {/* Hide Actions column if not logged in */}
-          {isLoggedIn && <th>Actions</th>}
+          {/* Hide Actions column for patient */}
+          {isLoggedIn && !isPatient && <th>Actions</th>}
         </tr>
       </thead>
 
@@ -68,10 +75,10 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
 
               <td>{d.isBooked ? "Booked" : "Free"}</td>
 
-              {/* Actions visible only for logged-in users */}
-              {isLoggedIn && (
+              {/* Actions column only for Admin + Personnel */}
+              {canModify && (
                 <td className="text-center">
-                  {/* Details always allowed */}
+                  {/* Details is always allowed */}
                   <Link
                     to={`/availabledays/details/${d.id}`}
                     className="btn btn-info btn-sm me-2"
@@ -79,7 +86,7 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
                     Details
                   </Link>
 
-                  {/* Edit allowed if logged in */}
+                  {/* Edit allowed for non-patient */}
                   <Button
                     className="btn btn-primary btn-sm me-2"
                     onClick={() => window.location.assign(`/availabledays/edit/${d.id}`)}
@@ -87,7 +94,7 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
                     Edit
                   </Button>
 
-                  {/* Delete disabled if booked */}
+                  {/* Delete allowed only for non-patient */}
                   <Button
                     variant="danger"
                     size="sm"
@@ -98,6 +105,19 @@ const AvailableDayTable: React.FC<AvailableDayTableProps> = ({
                   </Button>
                 </td>
               )}
+
+              {/* patient view show only details button */}
+              {isPatient && (
+                <td className="text-center">
+                  <Link
+                    to={`/availabledays/details/${d.id}`}
+                    className="btn btn-info btn-sm"
+                  >
+                    Details
+                  </Link>
+                </td>
+              )}
+
             </tr>
           ))
         )}
