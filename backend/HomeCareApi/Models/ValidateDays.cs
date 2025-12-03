@@ -4,7 +4,7 @@ namespace HomeCareApi.Models
 {
     public class ValidateDays : ValidationAttribute //Start of validation, not done
     {
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value is DateTime date)
             {
