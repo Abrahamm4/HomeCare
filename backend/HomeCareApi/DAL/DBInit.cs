@@ -43,7 +43,7 @@ namespace HomeCareApi.DAL
                 context.SaveChanges();
             }
 
-            // Hent persisterte nøkler
+            // Hent nøkler
             var personnelsList = context.Personnels.ToList();
             if (!personnelsList.Any()) return;
 
@@ -85,7 +85,7 @@ namespace HomeCareApi.DAL
                 context.SaveChanges();
             }
 
-            // ----- Én Appointment (valgfritt) -----
+            // ----- one Appointment any -----
             if (!context.Appointments.Any())
             {
                 var firstAvailableDay = context.AvailableDays.FirstOrDefault();
