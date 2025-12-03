@@ -3,4 +3,5 @@ export interface Patient {
   name: string;
   phone?: string | null;
   email?: string | null;
+  authUserId?: string;
 }

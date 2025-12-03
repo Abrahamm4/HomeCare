@@ -13,8 +13,10 @@ const PersonnelTable: React.FC<PersonnelTableProps> = ({
   personnels,
   onPersonnelDeleted,
 }) => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
+
+  const isAdmin = user?.role === "Admin";
 
   return (
     <Table striped bordered hover>
@@ -22,7 +24,7 @@ const PersonnelTable: React.FC<PersonnelTableProps> = ({
         <tr>
           <th>Id</th>
           <th>Name</th>
-          {isLoggedIn && <th style={{ width: "220px" }}>Actions</th>}
+          {isLoggedIn && isAdmin && <th style={{ width: "220px" }}>Actions</th>}
         </tr>
       </thead>
 
@@ -31,8 +33,9 @@ const PersonnelTable: React.FC<PersonnelTableProps> = ({
           <tr key={p.id}>
             <td>{p.id}</td>
             <td>{p.name}</td>
-
-            {isLoggedIn && (
+            
+            {/* only admin can see edit and delete buttons */}
+            {isLoggedIn && isAdmin && (
               <td className="text-center">
                 {/* Edit */}
                 <Button
@@ -53,7 +56,7 @@ const PersonnelTable: React.FC<PersonnelTableProps> = ({
 
         {personnels.length === 0 && (
           <tr>
-            <td colSpan={isLoggedIn ? 3 : 2} className="text-center">
+            <td colSpan={isLoggedIn && isAdmin ? 3 : 2} className="text-center">
               No personnel found.
             </td>
           </tr>

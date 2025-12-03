@@ -8,7 +8,8 @@ import { useAuth } from "../Auth/AuthContext";
 
 const AvailableDayListPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  
+  const { isLoggedIn, user } = useAuth();
 
   const [days, setDays] = useState<AvailableDay[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,6 +49,13 @@ const AvailableDayListPage: React.FC = () => {
   });
 
   const handleDayDeleted = async (id: number) => {
+
+    // Block delete for patient
+    if (user?.role === "Patient") {
+      setError("Patients cannot delete available days.");
+      return;
+    }
+
     if (!window.confirm(`Delete slot ${id}?`)) return;
 
     try {
@@ -112,13 +120,14 @@ const AvailableDayListPage: React.FC = () => {
         showTimes={showTimes}
       />
 
-      {isLoggedIn && (
-      <Button
-        className="btn btn-primary mb-3 me-2"
-        onClick={() => navigate("/availabledays/create")}
-      >
-        Add New Available Day
-      </Button>
+      {/* Hide add button for patient */}
+      {isLoggedIn && user?.role !== "Patient" && (
+        <Button
+          className="btn btn-primary mb-3 me-2"
+          onClick={() => navigate("/availabledays/create")}
+        >
+          Add New Available Day
+        </Button>
       )}
     </div>
   );

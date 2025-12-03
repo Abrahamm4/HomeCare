@@ -4,7 +4,7 @@ import { getStoredToken } from "../Auth/AuthService";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const getAuthHeaders = (): HeadersInit => {
-  const token = getStoredToken(); // Uses the same key as authservice
+  const token = getStoredToken();
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
@@ -16,19 +16,23 @@ const getAuthHeaders = (): HeadersInit => {
   return headers;
 };
 
+// handle response to show only detail
 const handleResponse = async (response: Response) => {
   if (response.ok) {
     if (response.status === 204) return null;
     return response.json();
-  } else {
-    if (response.status === 401) {
-      const errorText = await response.text();
-      throw new Error(errorText || "Unauthorized - please log in again.");
-    }
-
-    const errorText = await response.text();
-    throw new Error(errorText || "Network response was not ok");
   }
+
+  // Try reading JSON error body
+  const errorBody = await response.json().catch(() => null);
+
+  const message =
+    errorBody?.detail ||
+    errorBody?.errors?.[Object.keys(errorBody?.errors ?? {})[0]]?.[0] ||
+    errorBody?.title ||
+    "An unexpected error occurred";
+
+  throw new Error(message);
 };
 
 // GET: api/personnel

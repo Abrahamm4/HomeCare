@@ -1,5 +1,7 @@
 ﻿using HomeCareApi.Models;
 using Microsoft.AspNetCore.Identity;
+using HomeCareApi.DAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeCareApi.DAL
 {
@@ -27,10 +29,28 @@ namespace HomeCareApi.DAL
                 role: "Admin");
 
             await CreateUserIfNotExists(userManager,
-                username: "personnel",
-                email: "personnel@homecare.com",
-                password: "Personnel123!",
+                username: "personnel1",
+                email: "personnel1@homecare.com",
+                password: "Personnel1!",
                 role: "Personnel");
+
+            await CreateUserIfNotExists(userManager,
+                username: "personnel2",
+                email: "personnel2@homecare.com",
+                password: "Personnel2!",
+                role: "Personnel");
+
+            await CreateUserIfNotExists(userManager,
+                username: "patient1",
+                email: "patient1@homecare.com",
+                password: "Patient1!",
+                role: "Patient");
+
+            await CreateUserIfNotExists(userManager,
+                username: "patient2",
+                email: "patient2@homecare.com",
+                password: "Patient2!",
+                role: "Patient");
         }
 
         private static async Task CreateUserIfNotExists(
@@ -62,6 +82,44 @@ namespace HomeCareApi.DAL
                         $"{string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
             }
+        }
+
+        // Link Identity users to domain entities for testing/demo
+        public static async Task SeedLinkedProfiles(UserManager<AuthUser> userManager, HomeCareDbContext db)
+        {
+            // Patients: every Identity user in Patient role gets a Patient with AuthUserId
+            var patientUsers = await userManager.GetUsersInRoleAsync("Patient");
+            foreach (var user in patientUsers)
+            {
+                var exists = await db.Patients.AsNoTracking().AnyAsync(p => p.AuthUserId == user.Id);
+                if (!exists)
+                {
+                    db.Patients.Add(new Patient
+                    {
+                        Name = user.UserName ?? user.Email ?? "",
+                        Email = user.Email,
+                        Phone = null,
+                        AuthUserId = user.Id
+                    });
+                }
+            }
+
+            // Personnel: Identity users in Personnel role get a Personnel with AuthUserId
+            var personnelUsers = await userManager.GetUsersInRoleAsync("Personnel");
+            foreach (var user in personnelUsers)
+            {
+                var exists = await db.Personnels.AsNoTracking().AnyAsync(p => p.AuthUserId == user.Id);
+                if (!exists)
+                {
+                    db.Personnels.Add(new Personnel
+                    {
+                        Name = user.UserName ?? user.Email ?? "",
+                        AuthUserId = user.Id
+                    });
+                }
+            }
+
+            await db.SaveChangesAsync();
         }
     }
 }

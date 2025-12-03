@@ -17,20 +17,23 @@ const getAuthHeaders = (): HeadersInit => {
   return headers;
 };
 
-// Handle response 
+// handle response to show only detail
 const handleResponse = async (response: Response) => {
   if (response.ok) {
     if (response.status === 204) return null;
     return response.json();
-  } else {
-    if (response.status === 401) {
-      const errorText = await response.text();
-      throw new Error(errorText || "Unauthorized - please log in again.");
-    }
-
-    const errorText = await response.text();
-    throw new Error(errorText || "Network response was not ok");
   }
+
+  // Try reading JSON error body
+  const errorBody = await response.json().catch(() => null);
+
+  const message =
+    errorBody?.detail ||
+    errorBody?.errors?.[Object.keys(errorBody?.errors ?? {})[0]]?.[0] ||
+    errorBody?.title ||
+    "An unexpected error occurred";
+
+  throw new Error(message);
 };
 
 // Get all

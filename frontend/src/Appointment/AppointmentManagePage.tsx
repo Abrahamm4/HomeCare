@@ -10,6 +10,7 @@ import * as AppointmentService from "./AppointmentService";
 import * as AvailableDayService from "../AvailableDays/AvailableDayService";
 import * as PatientService from "../Patient/PatientService";
 import * as PersonnelService from "../Personnel/PersonnelService";
+import { useAuth } from "../Auth/AuthContext";
 
 interface MergedSlot {
   availableDay: AvailableDay;
@@ -20,7 +21,7 @@ const AppointmentManagePage: React.FC = () => {
   const [slots, setSlots] = useState<MergedSlot[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const fetchBookedAppointments = async () => {
@@ -40,23 +41,30 @@ const AppointmentManagePage: React.FC = () => {
         PersonnelService.fetchPersonnels(),
       ]);
 
-      const bookedSlots: MergedSlot[] = appointments.reduce(
-        (acc, appt) => {
-          const day = availableDays.find((d) => d.id === appt.availableDayId);
+      const bookedSlots: MergedSlot[] = appointments
+        .filter((appt) => {
+          // Patients only see their own appointments
+          if (user?.role === "Patient") {
+            const patient = patients.find((p) => p.patientId === appt.patientId);
+            return patient?.authUserId === user.nameid;
+          }
+          // Admin and Personnel see all appointments
+          return true;
+        })
+        .reduce((acc, apppt) => {
+          const day = availableDays.find((d) => d.id === apppt.availableDayId);
           if (!day) return acc;
 
-          const patient = patients.find((p) => p.patientId === appt.patientId);
+          const patient = patients.find((p) => p.patientId === apppt.patientId);
           const person = personnel.find((p) => p.id === day.personnelId);
 
           acc.push({
             availableDay: { ...day, personnel: person },
-            appointment: { ...appt, patient, personnel: person },
+            appointment: { ...apppt, patient, personnel: person },
           });
 
           return acc;
-        },
-        [] as MergedSlot[]
-      );
+        }, [] as MergedSlot[]);
 
       setSlots(bookedSlots);
     } catch (err) {
@@ -68,8 +76,10 @@ const AppointmentManagePage: React.FC = () => {
   };
 
   useEffect(() => {
-    void fetchBookedAppointments();
-  }, []);
+    if (user) {
+      void fetchBookedAppointments();
+    }
+  }, [user]);
 
   const handleEdit = (appointmentId: number) => {
     navigate(`/appointment/update/${appointmentId}`);

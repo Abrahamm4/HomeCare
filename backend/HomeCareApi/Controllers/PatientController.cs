@@ -13,7 +13,7 @@ namespace HomeCareApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PatientController : ControllerBase
+    public class PatientController : BaseApiController
     {
         private readonly IPatientRepository _repo;
         private readonly ILogger<PatientController> _logger;
@@ -29,7 +29,8 @@ namespace HomeCareApi.Controllers
             PatientId = p.PatientId,
             Name = p.Name,
             Phone = p.Phone,
-            Email = p.Email
+            Email = p.Email,
+            AuthUserId = p.AuthUserId
         };
 
         // GET: api/patient
@@ -45,7 +46,7 @@ namespace HomeCareApi.Controllers
         public async Task<ActionResult<PatientDto>> GetById(int id)
         {
             var patient = await _repo.GetByIdAsync(id);
-            if (patient == null) return NotFound();
+            if (patient == null) return NotFoundProblem(detail: $"Patient {id} not found");
             return Ok(ToDto(patient));
         }
 
@@ -58,7 +59,7 @@ namespace HomeCareApi.Controllers
             if (!success)
             {
                 _logger.LogError("[PatientController] Create failed for {@Patient}", model);
-                return Problem("Could not create patient");
+                return InternalServerErrorProblem(detail: "Could not create patient");
             }
             return CreatedAtAction(nameof(GetById), new { id = model.PatientId }, ToDto(model));
         }
@@ -67,10 +68,10 @@ namespace HomeCareApi.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] Patient model)
         {
-            if (id != model.PatientId) return BadRequest("Id mismatch");
+            if (id != model.PatientId) return BadRequestProblem(detail: "Id mismatch");
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var success = await _repo.UpdateAsync(model);
-            if (!success) return Problem("Could not update patient");
+            if (!success) return InternalServerErrorProblem(detail: "Could not update patient");
             return NoContent();
         }
 
@@ -80,7 +81,7 @@ namespace HomeCareApi.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _repo.DeleteAsync(id);
-            if (!success) return NotFound();
+            if (!success) return NotFoundProblem(detail: $"Patient {id} not found");
             return NoContent();
         }
     }

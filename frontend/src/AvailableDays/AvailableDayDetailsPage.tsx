@@ -3,10 +3,14 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { Alert, Button } from "react-bootstrap";
 import type { AvailableDay } from "../types/AvailableDay";
 import * as AvailableDayService from "./AvailableDayService";
+import { useAuth } from "../Auth/AuthContext";  
 
 const AvailableDayDetailsPage: React.FC = () => {
   const { availableDayId } = useParams<{ availableDayId: string }>();
   const navigate = useNavigate();
+
+  const { user } = useAuth();                     
+  const isPatient = user?.role === "Patient"; // User role to hide delete and edit buttons
 
   const [day, setDay] = useState<AvailableDay | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -77,20 +81,25 @@ const AvailableDayDetailsPage: React.FC = () => {
           </p>
 
           <div className="d-flex flex-wrap gap-2 mt-3">
+            {/* Hide edit button for patient */}
+            {!isPatient && (
             <Link
               to={`/availabledays/edit/${day.id}`}
               className="btn btn-primary btn-sm"
             >
               Edit
             </Link>
+            )}
 
-
-            { <Link
-              to={`/availabledays/delete/${day.id}`}
-              className="btn btn-danger btn-sm"
-            >
-              Delete
-            </Link> }
+            {/* Hide delete button for patient */}
+            {!isPatient && (
+              <Link
+                to={`/availabledays/delete/${day.id}`}
+                className="btn btn-danger btn-sm"
+              >
+                Delete
+              </Link>
+            )}
 
             <Button variant="secondary" size="sm" onClick={() => navigate(-1)}>
               Back
