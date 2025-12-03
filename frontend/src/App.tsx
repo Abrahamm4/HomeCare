@@ -56,7 +56,7 @@ const App: React.FC = () => {
             <Route
               path="/availabledays/create"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin", "Personnel"]}>
                   <AvailableDayCreatePage />
                 </ProtectedRoute>
               }
@@ -65,7 +65,7 @@ const App: React.FC = () => {
             <Route
               path="/availabledays/edit/:availableDayId"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin", "Personnel"]}>
                   <AvailableDayUpdatePage />
                 </ProtectedRoute>
               }
@@ -73,7 +73,11 @@ const App: React.FC = () => {
 
             <Route
               path="/availabledays/delete/:availableDayId"
-              element={<AvailableDayDeletePage />}
+              element={
+                <ProtectedRoute allowedRoles={["Admin", "Personnel"]}>
+                  <AvailableDayDeletePage />
+                </ProtectedRoute>
+              }
             />
 
             <Route
@@ -87,7 +91,7 @@ const App: React.FC = () => {
             <Route
               path="/appointment/update/:appointmentId"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin", "Patient"]}>
                   <AppointmentUpdatePage />
                 </ProtectedRoute>
               }
@@ -95,18 +99,26 @@ const App: React.FC = () => {
 
             <Route
               path="/appointment/book/:availableDayId"
-              element={<AppointmentBookPage />}
+              element={
+                <ProtectedRoute allowedRoles={["Patient"]}>
+                  <AppointmentBookPage />
+                </ProtectedRoute>
+              }
             />
 
             <Route
               path="/appointment/manage"
-              element={<AppointmentManagePage />}
+              element={
+                <ProtectedRoute allowedRoles={["Patient", "Admin"]}>
+                  <AppointmentManagePage />
+                </ProtectedRoute>
+              }
             />
 
             <Route
               path="/appointment/delete/:appointmentId"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin", "Patient"]}>
                   <AppointmentDeletePage />
                 </ProtectedRoute>
               }
@@ -123,7 +135,7 @@ const App: React.FC = () => {
             <Route
               path="/patientcreate"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin"]}>
                   <PatientCreatePage />
                 </ProtectedRoute>
               }
@@ -132,7 +144,7 @@ const App: React.FC = () => {
             <Route
               path="/patientupdate/:patientId"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin"]}>
                   <PatientUpdatePage />
                 </ProtectedRoute>
               }
@@ -144,7 +156,7 @@ const App: React.FC = () => {
             <Route
               path="/personnelcreate"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin"]}>
                   <PersonnelCreatePage />
                 </ProtectedRoute>
               }
@@ -153,7 +165,7 @@ const App: React.FC = () => {
             <Route
               path="/personnelupdate/:personnelId"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["Admin"]}>
                   <PersonnelUpdatePage />
                 </ProtectedRoute>
               }

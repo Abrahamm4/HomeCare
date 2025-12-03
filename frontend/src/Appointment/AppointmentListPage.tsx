@@ -19,7 +19,7 @@ interface MergedSlot {
 
 const AppointmentListPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
 
   const [slots, setSlots] = useState<MergedSlot[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -84,7 +84,7 @@ const AppointmentListPage: React.FC = () => {
 
     try {
       await AppointmentService.deleteAppointment(appointmentId);
-      fetchSlots();
+      void fetchSlots();
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to delete appointment.");
@@ -152,14 +152,14 @@ const AppointmentListPage: React.FC = () => {
         onDelete={handleDelete}
       />
 
-      {isLoggedIn && (
-      <Button
-        variant="warning"
-        className="mb-3 me-2"
-        onClick={() => navigate("/appointment/manage")}
-      >
-        Manage Appointments
-      </Button>
+      {isLoggedIn && (user?.role === "Patient" || user?.role === "Admin") && (
+        <Button
+          variant="warning"
+          className="mb-3 me-2"
+          onClick={() => navigate("/appointment/manage")}
+        >
+          {user?.role === "Admin" ? "Manage All Appointments" : "Manage My Appointments"}
+        </Button>
       )}
     </div>
   );

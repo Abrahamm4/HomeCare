@@ -29,7 +29,8 @@ namespace HomeCareApi.Controllers
             PatientId = p.PatientId,
             Name = p.Name,
             Phone = p.Phone,
-            Email = p.Email
+            Email = p.Email,
+            AuthUserId = p.AuthUserId
         };
 
         // GET: api/patient
